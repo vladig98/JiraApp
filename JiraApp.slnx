@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="jiraapp.client/jiraapp.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="JiraApp.Server/JiraApp.Server.csproj" />
+</Solution>
