@@ -1,4 +1,4 @@
-namespace JiraApp.Server.Data;
+﻿namespace JiraApp.Server.Data;
 
 public class MainDbContext(DbContextOptions<MainDbContext> options) : DbContext(options)
 {

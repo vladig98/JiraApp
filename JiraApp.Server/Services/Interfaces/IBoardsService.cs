@@ -2,5 +2,8 @@
 
 public interface IBoardsService
 {
-    Task<List<BoardDto>> GetAllBoardsAsync(CancellationToken token);
+    Task<Result<BoardDto>> CreateBoardAsync(CreateBoardDto createBoardDto, CancellationToken ct);
+    Task<BaseResult> DeleteBoardAsync(Guid id, CancellationToken ct);
+    Task<IReadOnlyList<BoardDto>> GetAllBoardsAsync(CancellationToken token);
+    Task<Result<BoardDto>> UpdateBoardAsync(EditBoardDto editBoardDto, Guid id, CancellationToken ct);
 }
