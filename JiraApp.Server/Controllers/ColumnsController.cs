@@ -2,29 +2,62 @@
 
 [Route("columns")]
 [ApiController]
-public class ColumnsController : ControllerBase
+public class ColumnsController(IColumnService columnService) : ControllerBase
 {
     [HttpPost("/boards/{boardId:Guid}/columns")]
-    public async Task<IActionResult> Create(Guid boardId, CancellationToken ct)
+    public async Task<ActionResult<ColumnDto>> Create(Guid boardId, CreateColumnDto createColumnDto, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        Result<ColumnDto> columnResult = await columnService.CreateColumnAsync(boardId, createColumnDto, ct);
+        if (columnResult.IsFailure)
+        {
+            return StatusCodeBasedOnErrorType(columnResult);
+        }
+
+        return Ok(columnResult.Data);
     }
 
     [HttpPut("{id:Guid}")]
-    public async Task<IActionResult> Update(Guid id, CancellationToken ct)
+    public async Task<IActionResult> Update(Guid id, EditColumnDto editColumnDto, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        Result<ColumnDto> columnResult = await columnService.UpdateColumnAsync(id, editColumnDto, ct);
+        if (columnResult.IsFailure)
+        {
+            return StatusCodeBasedOnErrorType(columnResult);
+        }
+
+        return Ok(columnResult.Data);
     }
 
     [HttpDelete("{id:Guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        BaseResult columnResult = await columnService.DeleteColumnAsync(id, ct);
+        if (columnResult.IsFailure)
+        {
+            return StatusCodeBasedOnErrorType(columnResult);
+        }
+
+        return NoContent();
     }
 
     [HttpPut("reorder")]
-    public async Task<IActionResult> Reorder(Guid id, CancellationToken ct)
+    public async Task<IActionResult> Reorder(ReorderColumnDto reorderColumnDto, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        Result<ColumnDto> columnResult = await columnService.UpdateColumnOrderAsync(reorderColumnDto, ct);
+        if (columnResult.IsFailure)
+        {
+            return StatusCodeBasedOnErrorType(columnResult);
+        }
+
+        return Ok(columnResult.Data);
+    }
+
+    private ObjectResult StatusCodeBasedOnErrorType(BaseResult boardResult)
+    {
+        return boardResult.ErrorType switch
+        {
+            ErrorType.NotFound => NotFound(boardResult.Error),
+            _ or ErrorType.Unexpected => StatusCode(500, boardResult.Error),
+        };
     }
 }

@@ -2,35 +2,74 @@
 
 [Route("tasks")]
 [ApiController]
-public class TasksController : ControllerBase
+public class TasksController(ITasksService tasksService) : ControllerBase
 {
     [HttpPost("/columns/{columnId:Guid}/tasks")]
-    public async Task<IActionResult> Create(Guid columnId, CancellationToken ct)
+    public async Task<IActionResult> Create(Guid columnId, CreateTaskDto createTaskDto, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        Result<TaskDto> taskResult = await tasksService.CreateTaskAsync(columnId, createTaskDto, ct);
+        if (taskResult.IsFailure)
+        {
+            return StatusCodeBasedOnErrorType(taskResult);
+        }
+
+        return Ok(taskResult.Data);
     }
 
     [HttpPut("{id:Guid}")]
-    public async Task<IActionResult> Update(Guid id, CancellationToken ct)
+    public async Task<IActionResult> Update(Guid id, UpdateTaskDto updateTaskDto, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        Result<TaskDto> taskResult = await tasksService.UpdateTaskAsync(id, updateTaskDto, ct);
+        if (taskResult.IsFailure)
+        {
+            return StatusCodeBasedOnErrorType(taskResult);
+        }
+
+        return Ok(taskResult.Data);
     }
 
     [HttpDelete("{id:Guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        BaseResult taskResult = await tasksService.DeleteTaskAsync(id, ct);
+        if (taskResult.IsFailure)
+        {
+            return StatusCodeBasedOnErrorType(taskResult);
+        }
+
+        return NoContent();
     }
 
     [HttpPut("move")]
-    public async Task<IActionResult> Move(Guid id, CancellationToken ct)
+    public async Task<IActionResult> Move(MoveTaskDto moveTaskDto, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        Result<TaskDto> taskResult = await tasksService.MoveTaskAsync(moveTaskDto, ct);
+        if (taskResult.IsFailure)
+        {
+            return StatusCodeBasedOnErrorType(taskResult);
+        }
+
+        return Ok(taskResult.Data);
     }
 
     [HttpPut("reorder")]
-    public async Task<IActionResult> Reorder(Guid id, CancellationToken ct)
+    public async Task<IActionResult> Reorder(ReorderTaskDto reorderTaskDto, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        Result<TaskDto> taskResult = await tasksService.ReorderTaskAsync(reorderTaskDto, ct);
+        if (taskResult.IsFailure)
+        {
+            return StatusCodeBasedOnErrorType(taskResult);
+        }
+
+        return Ok(taskResult.Data);
+    }
+
+    private ObjectResult StatusCodeBasedOnErrorType(BaseResult boardResult)
+    {
+        return boardResult.ErrorType switch
+        {
+            ErrorType.NotFound => NotFound(boardResult.Error),
+            _ or ErrorType.Unexpected => StatusCode(500, boardResult.Error),
+        };
     }
 }

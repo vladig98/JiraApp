@@ -1,10 +1,11 @@
 ﻿global using JiraApp.Server.Api;
 global using JiraApp.Server.Data;
 global using JiraApp.Server.Dtos.Boards;
+global using JiraApp.Server.Dtos.Columns;
 global using JiraApp.Server.Models;
 global using JiraApp.Server.Services;
 global using JiraApp.Server.Services.Interfaces;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
-global using Microsoft.EntityFrameworkCore.ChangeTracking;
 global using Scalar.AspNetCore;
+global using JiraApp.Server.Dtos.Tasks;

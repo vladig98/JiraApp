@@ -6,4 +6,6 @@ public class ColumnModel : BaseModel
     public BoardModel Board { get; set; } = null!;
 
     public required string Name { get; set; }
+
+    public ICollection<TaskModel> Tasks { get; set; } = [];
 }

@@ -4,6 +4,9 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IBoardsService, BoardsService>();
+builder.Services.AddScoped<IColumnService, ColumnService>();
+builder.Services.AddScoped<ITasksService, TasksService>();
+
 builder.Services.AddDbContext<MainDbContext>(opt =>
 {
     string hostName = "localhost";

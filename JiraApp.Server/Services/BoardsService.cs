@@ -5,10 +5,12 @@ public class BoardsService(MainDbContext mainDbContext) : IBoardsService
     public async Task<Result<BoardDto>> CreateBoardAsync(CreateBoardDto createBoardDto, CancellationToken ct)
     {
         DateTime now = DateTime.UtcNow;
+        int currentCount = await mainDbContext.Boards.CountAsync(ct);
+
         BoardModel board = new()
         {
             Name = createBoardDto.Name,
-            OrderIndex = createBoardDto.OrderIndex,
+            OrderIndex = currentCount,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -48,7 +50,6 @@ public class BoardsService(MainDbContext mainDbContext) : IBoardsService
         DateTime now = DateTime.UtcNow;
 
         board.Name = editBoardDto.Name;
-        board.OrderIndex = editBoardDto.OrderIndex;
         board.UpdatedAt = now;
 
         await mainDbContext.SaveChangesAsync(ct);
