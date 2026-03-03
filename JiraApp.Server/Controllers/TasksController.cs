@@ -2,7 +2,7 @@
 
 [Route("tasks")]
 [ApiController]
-public class TasksController(ITasksService tasksService) : ControllerBase
+public class TasksController(ITasksService tasksService, IHubContext hubContext) : ControllerBase
 {
     [HttpPost("/columns/{columnId:Guid}/tasks")]
     public async Task<IActionResult> Create(Guid columnId, CreateTaskDto createTaskDto, CancellationToken ct)
@@ -13,6 +13,7 @@ public class TasksController(ITasksService tasksService) : ControllerBase
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskCreated), ct);
         return Ok(taskResult.Data);
     }
 
@@ -25,6 +26,7 @@ public class TasksController(ITasksService tasksService) : ControllerBase
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskUpdated), ct);
         return Ok(taskResult.Data);
     }
 
@@ -37,6 +39,7 @@ public class TasksController(ITasksService tasksService) : ControllerBase
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskDeleted), ct);
         return NoContent();
     }
 
@@ -49,6 +52,7 @@ public class TasksController(ITasksService tasksService) : ControllerBase
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskMoved), ct);
         return Ok(taskResult.Data);
     }
 
@@ -61,6 +65,7 @@ public class TasksController(ITasksService tasksService) : ControllerBase
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskMoved), ct);
         return Ok(taskResult.Data);
     }
 

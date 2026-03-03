@@ -2,6 +2,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IBoardsService, BoardsService>();
 builder.Services.AddScoped<IColumnService, ColumnService>();
@@ -13,8 +14,8 @@ builder.Services.AddDbContext<MainDbContext>(opt =>
     int port = 5432;
     string databaseName = "kanbanDb";
     bool pooling = true;
-    string user = "";
-    string password = "";
+    string user = "postgres";
+    string password = "Vladi98*";
 
     opt.UseNpgsql($"Host={hostName};Port={port};Database={databaseName};Pooling={pooling};User ID={user};Password={password};");
 });

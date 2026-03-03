@@ -2,7 +2,7 @@
 
 [Route("columns")]
 [ApiController]
-public class ColumnsController(IColumnService columnService) : ControllerBase
+public class ColumnsController(IColumnService columnService, IHubContext hubContext) : ControllerBase
 {
     [HttpPost("/boards/{boardId:Guid}/columns")]
     public async Task<ActionResult<ColumnDto>> Create(Guid boardId, CreateColumnDto createColumnDto, CancellationToken ct)
@@ -49,6 +49,7 @@ public class ColumnsController(IColumnService columnService) : ControllerBase
             return StatusCodeBasedOnErrorType(columnResult);
         }
 
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveColumnReordered), ct);
         return Ok(columnResult.Data);
     }
 
