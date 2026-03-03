@@ -1,6 +1,4 @@
-﻿using JiraApp.Server.Dtos.Columns;
-
-namespace JiraApp.Server.Services.Interfaces;
+﻿namespace JiraApp.Server.Services.Interfaces;
 
 public interface IColumnService
 {

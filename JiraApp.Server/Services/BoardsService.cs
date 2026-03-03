@@ -24,16 +24,25 @@ public class BoardsService(MainDbContext mainDbContext) : IBoardsService
     public async Task<BaseResult> DeleteBoardAsync(Guid id, CancellationToken ct)
     {
         int deletedEntries = await mainDbContext.Boards.Where(x => x.Id == id).ExecuteDeleteAsync(ct);
-
         if (deletedEntries == 0)
         {
             return BaseResult.Failure($"Board with {id} not found.", ErrorType.NotFound);
         }
 
+        List<BoardModel> boards = await mainDbContext.Boards.OrderBy(x => x.OrderIndex).ToListAsync(ct);
+        int orderIndex = 0;
+
+        foreach (BoardModel board in boards)
+        {
+            board.OrderIndex = orderIndex++;
+        }
+
+        await mainDbContext.SaveChangesAsync(ct);
+
         return BaseResult.Success();
     }
 
-    public async Task<IReadOnlyList<BoardDto>> GetAllBoardsAsync(CancellationToken token) 
+    public async Task<IReadOnlyList<BoardDto>> GetAllBoardsAsync(CancellationToken token)
         => await mainDbContext.Boards
             .AsNoTracking()
             .Select(x => new BoardDto(x.Id, x.Name, x.OrderIndex, x.CreatedAt, x.UpdatedAt))

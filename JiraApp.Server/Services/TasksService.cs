@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-
-namespace JiraApp.Server.Services;
+﻿namespace JiraApp.Server.Services;
 
 public class TasksService(MainDbContext mainDbContext) : ITasksService
 {
@@ -33,19 +31,31 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
 
     public async Task<BaseResult> DeleteTaskAsync(Guid id, CancellationToken ct)
     {
-        TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (task is null)
+        using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
+
+        try
         {
-            return BaseResult.Failure($"Task with id {id} does not exist.", ErrorType.NotFound);
+            TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == id, ct);
+            if (task is null)
+            {
+                return BaseResult.Failure($"Task with id {id} does not exist.", ErrorType.NotFound);
+            }
+
+            mainDbContext.Tasks.Remove(task);
+            await mainDbContext.SaveChangesAsync(ct);
+
+            await UpdateOrderIndexToAllTasks(task.ColumnId, ct);
+            await mainDbContext.SaveChangesAsync(ct);
+
+            await transaction.CommitAsync(ct);
+
+            return BaseResult.Success();
         }
-
-        mainDbContext.Tasks.Remove(task);
-        await mainDbContext.SaveChangesAsync(ct);
-
-        await UpdateOrderIndexToAllTasks(task.ColumnId, ct);
-        await mainDbContext.SaveChangesAsync(ct);
-
-        return BaseResult.Success();
+        catch (Exception)
+        {
+            await transaction.RollbackAsync(ct);
+            throw;
+        }
     }
 
     public async Task<Result<TaskDto>> MoveTaskAsync(MoveTaskDto moveTaskDto, CancellationToken ct)
@@ -94,22 +104,34 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
 
     public async Task<Result<TaskDto>> ReorderTaskAsync(ReorderTaskDto reorderTaskDto, CancellationToken ct)
     {
-        TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == reorderTaskDto.Id, ct);
-        if (task is null)
+        using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
+
+        try
         {
-            return Result<TaskDto>.Failure($"Task with id {reorderTaskDto.Id} does not exist.", ErrorType.NotFound);
+            TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == reorderTaskDto.Id, ct);
+            if (task is null)
+            {
+                return Result<TaskDto>.Failure($"Task with id {reorderTaskDto.Id} does not exist.", ErrorType.NotFound);
+            }
+
+            task.OrderIndex = -1;
+            task.UpdatedAt = DateTime.UtcNow;
+
+            await mainDbContext.SaveChangesAsync(ct);
+            await UpdateOrderIndexToAllTasksWithId(task.ColumnId, reorderTaskDto.OrderIndex, ct);
+
+            task.OrderIndex = reorderTaskDto.OrderIndex;
+            await mainDbContext.SaveChangesAsync(ct);
+
+            await transaction.CommitAsync(ct);
+
+            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex);
         }
-
-        task.OrderIndex = -1;
-        task.UpdatedAt = DateTime.UtcNow;
-
-        await mainDbContext.SaveChangesAsync(ct);
-        await UpdateOrderIndexToAllTasksWithId(task.ColumnId, reorderTaskDto.OrderIndex, ct);
-
-        task.OrderIndex = reorderTaskDto.OrderIndex;
-        await mainDbContext.SaveChangesAsync(ct);
-
-        return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex);
+        catch (Exception)
+        {
+            await transaction.RollbackAsync(ct);
+            throw;
+        }
     }
 
     public async Task<Result<TaskDto>> UpdateTaskAsync(Guid id, UpdateTaskDto updateTaskDto, CancellationToken ct)
