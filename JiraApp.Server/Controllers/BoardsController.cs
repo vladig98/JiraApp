@@ -18,7 +18,7 @@ public class BoardsController(
     public async Task<ActionResult<BoardDto>> Create(CreateBoardDto createBoardDto, CancellationToken ct)
     {
         ValidationResult validationResult = await createdBoardValidator.ValidateAsync(createBoardDto, ct);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }
@@ -36,7 +36,7 @@ public class BoardsController(
     public async Task<ActionResult<BoardDto>> Update(EditBoardDto editBoardDto, Guid id, CancellationToken ct)
     {
         ValidationResult validationResult = await editBoardValidator.ValidateAsync(editBoardDto, ct);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }

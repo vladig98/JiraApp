@@ -17,7 +17,7 @@ public class TasksController(
         context.RootContextData["ColumnId"] = columnId;
 
         ValidationResult validationResult = await createTaskValidator.ValidateAsync(context, ct);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }
@@ -39,7 +39,7 @@ public class TasksController(
         context.RootContextData["TaskId"] = id;
 
         ValidationResult validationResult = await editTaskValidator.ValidateAsync(context, ct);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }
@@ -71,7 +71,7 @@ public class TasksController(
     public async Task<IActionResult> Move(MoveTaskDto moveTaskDto, CancellationToken ct)
     {
         ValidationResult validationResult = await moveTaskValidator.ValidateAsync(moveTaskDto, ct);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }
@@ -90,7 +90,7 @@ public class TasksController(
     public async Task<IActionResult> Reorder(ReorderTaskDto reorderTaskDto, CancellationToken ct)
     {
         ValidationResult validationResult = await reorderTaskValidator.ValidateAsync(reorderTaskDto, ct);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }

@@ -16,7 +16,7 @@ public class ColumnsController(
         context.RootContextData["BoardId"] = boardId;
 
         ValidationResult validationResult = await createColumnValidator.ValidateAsync(context, ct);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }
@@ -37,7 +37,7 @@ public class ColumnsController(
         context.RootContextData["ColumnId"] = id;
 
         ValidationResult validationResult = await editColumnValidator.ValidateAsync(context, ct);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }
@@ -67,7 +67,7 @@ public class ColumnsController(
     public async Task<IActionResult> Reorder(ReorderColumnDto reorderColumnDto, CancellationToken ct)
     {
         ValidationResult validationResult = await reorderColumnValidator.ValidateAsync(reorderColumnDto, ct);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);
         }
