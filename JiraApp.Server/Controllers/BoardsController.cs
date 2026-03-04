@@ -29,7 +29,7 @@ public class BoardsController(
             return StatusCodeBasedOnErrorType(boardResult);
         }
 
-        return CreatedAtAction(nameof(Retrieve), new { id = boardResult.Data.Id }, boardResult.Data);
+        return Ok(boardResult.Data);
     }
 
     [HttpPut("{id:Guid}")]
