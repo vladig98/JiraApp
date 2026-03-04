@@ -4,5 +4,6 @@ public enum ErrorType
 {
     None = 0,
     NotFound = 1,
-    Unexpected = 2
+    Concurrency = 2,
+    Unexpected = 3
 }

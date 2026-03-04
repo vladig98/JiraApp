@@ -51,6 +51,11 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
 
             return BaseResult.Success();
         }
+        catch (DbUpdateConcurrencyException)
+        {
+            await transaction.RollbackAsync(ct);
+            return Result<TaskDto>.Failure($"Someone else was modifying this record at the same time.", ErrorType.Concurrency);
+        }
         catch (Exception)
         {
             await transaction.RollbackAsync(ct);
@@ -97,6 +102,11 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
 
             return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex);
         }
+        catch (DbUpdateConcurrencyException)
+        {
+            await transaction.RollbackAsync(ct);
+            return Result<TaskDto>.Failure($"Someone else was modifying this record at the same time.", ErrorType.Concurrency);
+        }
         catch (Exception)
         {
             await transaction.RollbackAsync(ct);
@@ -131,6 +141,11 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
 
             return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex);
         }
+        catch (DbUpdateConcurrencyException)
+        {
+            await transaction.RollbackAsync(ct);
+            return Result<TaskDto>.Failure($"Someone else was modifying this record at the same time.", ErrorType.Concurrency);
+        }
         catch (Exception)
         {
             await transaction.RollbackAsync(ct);
@@ -140,19 +155,30 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
 
     public async Task<Result<TaskDto>> UpdateTaskAsync(Guid id, EditTaskDto updateTaskDto, CancellationToken ct)
     {
-        TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (task is null)
+        try
         {
-            return Result<TaskDto>.Failure($"Task with id {id} does not exist.", ErrorType.NotFound);
+            TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == id, ct);
+            if (task is null)
+            {
+                return Result<TaskDto>.Failure($"Task with id {id} does not exist.", ErrorType.NotFound);
+            }
+
+            task.Title = updateTaskDto.Title;
+            task.Description = updateTaskDto.Description;
+            task.UpdatedAt = DateTime.UtcNow;
+
+            await mainDbContext.SaveChangesAsync(ct);
+
+            return new TaskDto(task.Id, task.Title, task.Description, task.OrderIndex);
         }
-
-        task.Title = updateTaskDto.Title;
-        task.Description = updateTaskDto.Description;
-        task.UpdatedAt = DateTime.UtcNow;
-
-        await mainDbContext.SaveChangesAsync(ct);
-
-        return new TaskDto(task.Id, task.Title, task.Description, task.OrderIndex);
+        catch (DbUpdateConcurrencyException)
+        {
+            return Result<TaskDto>.Failure($"Someone else was modifying this record at the same time.", ErrorType.Concurrency);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     private async Task UpdateOrderIndexToAllTasks(Guid columnId, CancellationToken ct)

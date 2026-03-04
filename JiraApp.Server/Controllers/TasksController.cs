@@ -110,6 +110,7 @@ public class TasksController(
         return boardResult.ErrorType switch
         {
             ErrorType.NotFound => NotFound(boardResult.Error),
+            ErrorType.Concurrency => Conflict(boardResult.Error),
             _ or ErrorType.Unexpected => StatusCode(500, boardResult.Error),
         };
     }
