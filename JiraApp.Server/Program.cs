@@ -54,6 +54,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
+app.MapHub<BoardHub>("/hubs/board");
 app.MapControllers();
 app.MapFallbackToFile("/index.html");
 

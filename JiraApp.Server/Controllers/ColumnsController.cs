@@ -78,7 +78,7 @@ public class ColumnsController(
             return StatusCodeBasedOnErrorType(columnResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveColumnReordered), ct);
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveColumnReordered), columnResult.Data, cancellationToken: ct);
         return Ok(columnResult.Data);
     }
 

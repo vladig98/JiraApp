@@ -28,7 +28,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskCreated), ct);
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskCreated), taskResult.Data, cancellationToken: ct);
         return Ok(taskResult.Data);
     }
 
@@ -50,7 +50,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskUpdated), ct);
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskUpdated), taskResult.Data, cancellationToken: ct);
         return Ok(taskResult.Data);
     }
 
@@ -63,7 +63,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskDeleted), ct);
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskDeleted), cancellationToken: ct);
         return NoContent();
     }
 
@@ -82,7 +82,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskMoved), ct);
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskMoved), taskResult.Data, cancellationToken: ct);
         return Ok(taskResult.Data);
     }
 
@@ -101,7 +101,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskMoved), ct);
+        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskMoved), taskResult.Data, cancellationToken: ct);
         return Ok(taskResult.Data);
     }
 
