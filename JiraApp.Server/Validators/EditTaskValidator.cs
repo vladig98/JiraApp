@@ -12,13 +12,13 @@ public class EditTaskValidator : AbstractValidator<EditTaskDto>
                 context.RootContextData.TryGetValue("TaskId", out object? taskIdObject);
                 if (taskIdObject is null)
                 {
-                    context.AddFailure("Missing column Id.");
+                    context.AddFailure("Missing task Id.");
                     return;
                 }
 
                 if (taskIdObject is not Guid taskId)
                 {
-                    context.AddFailure("Missing a valid column Id.");
+                    context.AddFailure("Missing a valid task Id.");
                     return;
                 }
 
