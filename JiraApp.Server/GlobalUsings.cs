@@ -7,6 +7,7 @@ global using JiraApp.Server.Dtos.Columns;
 global using JiraApp.Server.Dtos.Tasks;
 global using JiraApp.Server.Hubs;
 global using JiraApp.Server.Hubs.Interfaces;
+global using JiraApp.Server.Logging;
 global using JiraApp.Server.Models;
 global using JiraApp.Server.Services;
 global using JiraApp.Server.Services.Interfaces;

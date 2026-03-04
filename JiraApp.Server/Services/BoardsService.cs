@@ -1,67 +1,116 @@
 ﻿namespace JiraApp.Server.Services;
 
-public class BoardsService(MainDbContext mainDbContext) : IBoardsService
+public partial class BoardsService(
+    MainDbContext mainDbContext,
+    ILogger<BoardsService> logger) : IBoardsService
 {
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "Starting transaction for board creation {Name}")]
+    static partial void LogBoardCreationStarted(ILogger logger, string name);
+
     public async Task<Result<BoardDto>> CreateBoardAsync(CreateBoardDto createBoardDto, CancellationToken ct)
     {
-        DateTime now = DateTime.UtcNow;
-        int currentCount = await mainDbContext.Boards.CountAsync(ct);
+        logger.LogBoardCreationStarted(createBoardDto.Name);
 
-        BoardModel board = new()
+        using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
+        try
         {
-            Name = createBoardDto.Name,
-            OrderIndex = currentCount,
-            CreatedAt = now,
-            UpdatedAt = now
-        };
+            DateTime now = DateTime.UtcNow;
+            int currentCount = await mainDbContext.Boards.CountAsync(ct);
 
-        await mainDbContext.Boards.AddAsync(board, ct);
-        await mainDbContext.SaveChangesAsync(ct);
+            BoardModel board = new()
+            {
+                Name = createBoardDto.Name,
+                OrderIndex = currentCount,
+                CreatedAt = now,
+                UpdatedAt = now
+            };
 
-        return new BoardDto(board.Id, board.Name, board.OrderIndex, now, now);
+            await mainDbContext.Boards.AddAsync(board, ct);
+            await mainDbContext.SaveChangesAsync(ct);
+
+            await transaction.CommitAsync(ct);
+
+            return new BoardDto(board.Id, board.Name, board.OrderIndex, now, now);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(ct);
+            logger.LogBoardCreationError(createBoardDto.Name, ex.Message);
+
+            return Result<BoardDto>.Failure("An error occurred during creation.", ErrorType.Unexpected);
+        }
     }
 
     public async Task<BaseResult> DeleteBoardAsync(Guid id, CancellationToken ct)
     {
-        int deletedEntries = await mainDbContext.Boards.Where(x => x.Id == id).ExecuteDeleteAsync(ct);
-        if (deletedEntries == 0)
+        int? orderIndex = await mainDbContext.Boards
+            .Where(x => x.Id == id)
+            .Select(x => (int?)x.OrderIndex)
+            .FirstOrDefaultAsync(ct);
+
+        if (!orderIndex.HasValue)
         {
-            return BaseResult.Failure($"Board with {id} not found.", ErrorType.NotFound);
+            logger.LogBoardNotFound(id);
+            return BaseResult.Failure($"Board '{id}' not found.", ErrorType.NotFound);
         }
 
-        List<BoardModel> boards = await mainDbContext.Boards.OrderBy(x => x.OrderIndex).ToListAsync(ct);
-        int orderIndex = 0;
+        logger.LogBoardFound(id, orderIndex.Value);
 
-        foreach (BoardModel board in boards)
+        using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
+        try
         {
-            board.OrderIndex = orderIndex++;
+            await mainDbContext.Boards
+                .Where(x => x.Id == id)
+                .ExecuteDeleteAsync(ct);
+
+            // Shift the indices of all subsequent boards down by 1
+            await mainDbContext.Boards
+                .Where(x => x.OrderIndex > orderIndex.Value)
+                .ExecuteUpdateAsync(setter => setter.SetProperty(
+                    x => x.OrderIndex,
+                    x => x.OrderIndex - 1),
+                ct);
+
+            await transaction.CommitAsync(ct);
+            logger.LogBoardDeleted(id);
+
+            return BaseResult.Success();
         }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(ct);
+            logger.LogBoardDeletionError(id, ex.Message);
 
-        await mainDbContext.SaveChangesAsync(ct);
-
-        return BaseResult.Success();
+            return BaseResult.Failure("An error occurred during deletion.", ErrorType.Unexpected);
+        }
     }
 
     public async Task<IReadOnlyList<BoardDto>> GetAllBoardsAsync(CancellationToken token)
-        => await mainDbContext.Boards
-            .AsNoTracking()
-            .Select(x => new BoardDto(x.Id, x.Name, x.OrderIndex, x.CreatedAt, x.UpdatedAt))
-            .ToListAsync(token);
+    {
+        logger.LogFetchingAllBoards();
+        return await mainDbContext.Boards
+                .AsNoTracking()
+                .OrderBy(x => x.OrderIndex)
+                .Select(x => new BoardDto(x.Id, x.Name, x.OrderIndex, x.CreatedAt, x.UpdatedAt))
+                .ToListAsync(token);
+    }
 
     public async Task<Result<BoardDto>> UpdateBoardAsync(EditBoardDto editBoardDto, Guid id, CancellationToken ct)
     {
         BoardModel? board = await mainDbContext.Boards.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (board is null)
         {
-            return Result<BoardDto>.Failure($"Board with {id} not found.", ErrorType.NotFound);
+            return Result<BoardDto>.Failure($"Board '{id}' not found.", ErrorType.NotFound);
         }
 
-        DateTime now = DateTime.UtcNow;
-
         board.Name = editBoardDto.Name;
-        board.UpdatedAt = now;
+        board.UpdatedAt = DateTime.UtcNow;
 
         await mainDbContext.SaveChangesAsync(ct);
-        return new BoardDto(board.Id, board.Name, board.OrderIndex, board.CreatedAt, now);
+        logger.LogBoardUpdated(id, editBoardDto.Name);
+
+        return new BoardDto(board.Id, board.Name, board.OrderIndex, board.CreatedAt, board.UpdatedAt);
     }
 }
