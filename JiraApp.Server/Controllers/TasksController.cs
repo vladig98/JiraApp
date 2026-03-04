@@ -2,11 +2,26 @@
 
 [Route("tasks")]
 [ApiController]
-public class TasksController(ITasksService tasksService, IHubContext hubContext) : ControllerBase
+public class TasksController(
+    ITasksService tasksService,
+    IHubContext hubContext,
+    IValidator<CreateTaskDto> createTaskValidator,
+    IValidator<EditTaskDto> editTaskValidator,
+    IValidator<MoveTaskDto> moveTaskValidator,
+    IValidator<ReorderTaskDto> reorderTaskValidator) : ControllerBase
 {
     [HttpPost("/columns/{columnId:Guid}/tasks")]
     public async Task<IActionResult> Create(Guid columnId, CreateTaskDto createTaskDto, CancellationToken ct)
     {
+        ValidationContext<CreateTaskDto> context = new(createTaskDto);
+        context.RootContextData["ColumnId"] = columnId;
+
+        ValidationResult validationResult = await createTaskValidator.ValidateAsync(context, ct);
+        if (validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         Result<TaskDto> taskResult = await tasksService.CreateTaskAsync(columnId, createTaskDto, ct);
         if (taskResult.IsFailure)
         {
@@ -18,9 +33,18 @@ public class TasksController(ITasksService tasksService, IHubContext hubContext)
     }
 
     [HttpPut("{id:Guid}")]
-    public async Task<IActionResult> Update(Guid id, UpdateTaskDto updateTaskDto, CancellationToken ct)
+    public async Task<IActionResult> Update(Guid id, EditTaskDto editTaskDto, CancellationToken ct)
     {
-        Result<TaskDto> taskResult = await tasksService.UpdateTaskAsync(id, updateTaskDto, ct);
+        ValidationContext<EditTaskDto> context = new(editTaskDto);
+        context.RootContextData["TaskId"] = id;
+
+        ValidationResult validationResult = await editTaskValidator.ValidateAsync(context, ct);
+        if (validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
+        Result<TaskDto> taskResult = await tasksService.UpdateTaskAsync(id, editTaskDto, ct);
         if (taskResult.IsFailure)
         {
             return StatusCodeBasedOnErrorType(taskResult);
@@ -46,6 +70,12 @@ public class TasksController(ITasksService tasksService, IHubContext hubContext)
     [HttpPut("move")]
     public async Task<IActionResult> Move(MoveTaskDto moveTaskDto, CancellationToken ct)
     {
+        ValidationResult validationResult = await moveTaskValidator.ValidateAsync(moveTaskDto, ct);
+        if (validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         Result<TaskDto> taskResult = await tasksService.MoveTaskAsync(moveTaskDto, ct);
         if (taskResult.IsFailure)
         {
@@ -59,6 +89,12 @@ public class TasksController(ITasksService tasksService, IHubContext hubContext)
     [HttpPut("reorder")]
     public async Task<IActionResult> Reorder(ReorderTaskDto reorderTaskDto, CancellationToken ct)
     {
+        ValidationResult validationResult = await reorderTaskValidator.ValidateAsync(reorderTaskDto, ct);
+        if (validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         Result<TaskDto> taskResult = await tasksService.ReorderTaskAsync(reorderTaskDto, ct);
         if (taskResult.IsFailure)
         {

@@ -1,28 +1,35 @@
 ﻿namespace JiraApp.Server.Validators;
 
-public class CreateTaskValidator : AbstractValidator<CreateTaskDto>
+public class EditTaskValidator : AbstractValidator<EditTaskDto>
 {
-    public CreateTaskValidator(MainDbContext mainDbContext)
+    public EditTaskValidator(MainDbContext mainDbContext)
     {
         RuleFor(x => x.Title)
             .NotEmpty()
             .MinimumLength(3)
             .CustomAsync(async (title, context, ct) =>
             {
-                context.RootContextData.TryGetValue("ColumnId", out object? columnIdObject);
-                if (columnIdObject is null)
+                context.RootContextData.TryGetValue("TaskId", out object? taskIdObject);
+                if (taskIdObject is null)
                 {
                     context.AddFailure("Missing column Id.");
                     return;
                 }
 
-                if (columnIdObject is not Guid columnId)
+                if (taskIdObject is not Guid taskId)
                 {
                     context.AddFailure("Missing a valid column Id.");
                     return;
                 }
 
-                bool exists = await mainDbContext.Tasks.AnyAsync(c => c.Title == title && c.ColumnId == columnId, ct);
+                TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == taskId, ct);
+                if (task is null)
+                {
+                    context.AddFailure($"Task with id {taskId} does not exist.");
+                    return;
+                }
+
+                bool exists = await mainDbContext.Tasks.AnyAsync(c => c.Title == title && c.ColumnId == task.ColumnId, ct);
                 if (exists)
                 {
                     context.AddFailure("A task with this name already exists.");

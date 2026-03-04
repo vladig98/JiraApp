@@ -134,7 +134,7 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
         }
     }
 
-    public async Task<Result<TaskDto>> UpdateTaskAsync(Guid id, UpdateTaskDto updateTaskDto, CancellationToken ct)
+    public async Task<Result<TaskDto>> UpdateTaskAsync(Guid id, EditTaskDto updateTaskDto, CancellationToken ct)
     {
         TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (task is null)

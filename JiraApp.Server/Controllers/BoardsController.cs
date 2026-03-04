@@ -2,7 +2,10 @@
 
 [Route("boards")]
 [ApiController]
-public class BoardsController(IBoardsService boardsService) : ControllerBase
+public class BoardsController(
+    IBoardsService boardsService,
+    IValidator<CreateBoardDto> createdBoardValidator,
+    IValidator<EditBoardDto> editBoardValidator) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<BoardDto>>> Retrieve(CancellationToken ct)
@@ -14,6 +17,12 @@ public class BoardsController(IBoardsService boardsService) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<BoardDto>> Create(CreateBoardDto createBoardDto, CancellationToken ct)
     {
+        ValidationResult validationResult = await createdBoardValidator.ValidateAsync(createBoardDto, ct);
+        if (validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         Result<BoardDto> boardResult = await boardsService.CreateBoardAsync(createBoardDto, ct);
         if (boardResult.IsFailure)
         {
@@ -26,6 +35,12 @@ public class BoardsController(IBoardsService boardsService) : ControllerBase
     [HttpPut("{id:Guid}")]
     public async Task<ActionResult<BoardDto>> Update(EditBoardDto editBoardDto, Guid id, CancellationToken ct)
     {
+        ValidationResult validationResult = await editBoardValidator.ValidateAsync(editBoardDto, ct);
+        if (validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         Result<BoardDto> boardResult = await boardsService.UpdateBoardAsync(editBoardDto, id, ct);
         if (boardResult.IsFailure)
         {

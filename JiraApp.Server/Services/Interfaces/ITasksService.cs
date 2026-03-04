@@ -6,5 +6,5 @@ public interface ITasksService
     Task<BaseResult> DeleteTaskAsync(Guid id, CancellationToken ct);
     Task<Result<TaskDto>> MoveTaskAsync(MoveTaskDto moveTaskDto, CancellationToken ct);
     Task<Result<TaskDto>> ReorderTaskAsync(ReorderTaskDto reorderTaskDto, CancellationToken ct);
-    Task<Result<TaskDto>> UpdateTaskAsync(Guid id, UpdateTaskDto updateTaskDto, CancellationToken ct);
+    Task<Result<TaskDto>> UpdateTaskAsync(Guid id, EditTaskDto updateTaskDto, CancellationToken ct);
 }

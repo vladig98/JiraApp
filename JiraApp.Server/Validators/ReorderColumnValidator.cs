@@ -6,9 +6,15 @@ public class ReorderColumnValidator : AbstractValidator<ReorderColumnDto>
     {
         RuleFor(x => x.OrderIndex)
             .GreaterThanOrEqualTo(0)
-            .MustAsync(async (orderIndex, cancellation) =>
+            .MustAsync(async (dto, orderIndex, cancellation) =>
             {
-                int count = await mainDbContext.Columns.CountAsync(cancellation);
+                ColumnModel? column = await mainDbContext.Columns.FirstOrDefaultAsync(x => x.Id == dto.Id, cancellation);
+                if (column is null)
+                {
+                    return false;
+                }
+
+                int count = await mainDbContext.Columns.Where(x => x.BoardId == column.BoardId).CountAsync(cancellation);
                 return orderIndex <= count;
             })
             .WithMessage("Order index cannot exceed the total number of columns.");

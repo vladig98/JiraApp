@@ -8,16 +8,23 @@ builder.Services.AddScoped<IBoardsService, BoardsService>();
 builder.Services.AddScoped<IColumnService, ColumnService>();
 builder.Services.AddScoped<ITasksService, TasksService>();
 
+builder.Services.AddScoped<IValidator<CreateBoardDto>, CreateBoardValidator>();
+builder.Services.AddScoped<IValidator<EditBoardDto>, EditBoardValidator>();
+builder.Services.AddScoped<IValidator<CreateColumnDto>, CreateColumnValidator>();
+builder.Services.AddScoped<IValidator<EditColumnDto>, EditColumnValidator>();
+builder.Services.AddScoped<IValidator<ReorderColumnDto>, ReorderColumnValidator>();
+builder.Services.AddScoped<IValidator<CreateTaskDto>, CreateTaskValidator>();
+builder.Services.AddScoped<IValidator<EditTaskDto>, EditTaskValidator>();
+builder.Services.AddScoped<IValidator<MoveTaskDto>, MoveTaskValidator>();
+builder.Services.AddScoped<IValidator<ReorderTaskDto>, ReorderTaskValidator>();
+
+string connStringName = "MainDbContext";
+string connectionString = builder.Configuration.GetConnectionString(connStringName)
+    ?? throw new InvalidOperationException($"Missing connection string {connStringName}");
+
 builder.Services.AddDbContext<MainDbContext>(opt =>
 {
-    string hostName = "localhost";
-    int port = 5432;
-    string databaseName = "kanbanDb";
-    bool pooling = true;
-    string user = "postgres";
-    string password = "Vladi98*";
-
-    opt.UseNpgsql($"Host={hostName};Port={port};Database={databaseName};Pooling={pooling};User ID={user};Password={password};");
+    opt.UseNpgsql(connectionString);
 });
 
 WebApplication app = builder.Build();

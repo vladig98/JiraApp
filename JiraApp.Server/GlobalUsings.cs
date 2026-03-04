@@ -1,4 +1,5 @@
 ﻿global using FluentValidation;
+global using FluentValidation.Results;
 global using JiraApp.Server.Api;
 global using JiraApp.Server.Data;
 global using JiraApp.Server.Dtos.Boards;
@@ -7,6 +8,7 @@ global using JiraApp.Server.Dtos.Tasks;
 global using JiraApp.Server.Models;
 global using JiraApp.Server.Services;
 global using JiraApp.Server.Services.Interfaces;
+global using JiraApp.Server.Validators;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.SignalR;
 global using Microsoft.EntityFrameworkCore;
