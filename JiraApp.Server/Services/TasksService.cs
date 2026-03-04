@@ -88,6 +88,8 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
             await mainDbContext.SaveChangesAsync(ct);
 
             await UpdateOrderIndexToAllTasksWithId(task.ColumnId, moveTaskDto.OrderIndex, ct);
+            await mainDbContext.SaveChangesAsync(ct);
+
             task.OrderIndex = moveTaskDto.OrderIndex;
 
             await mainDbContext.SaveChangesAsync(ct);
@@ -118,7 +120,9 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
             task.UpdatedAt = DateTime.UtcNow;
 
             await mainDbContext.SaveChangesAsync(ct);
+
             await UpdateOrderIndexToAllTasksWithId(task.ColumnId, reorderTaskDto.OrderIndex, ct);
+            await mainDbContext.SaveChangesAsync(ct);
 
             task.OrderIndex = reorderTaskDto.OrderIndex;
             await mainDbContext.SaveChangesAsync(ct);
@@ -182,7 +186,5 @@ public class TasksService(MainDbContext mainDbContext) : ITasksService
 
             task.OrderIndex = newOrderIndex++;
         }
-
-        await mainDbContext.SaveChangesAsync(ct);
     }
 }
