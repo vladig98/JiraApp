@@ -29,7 +29,7 @@ public class EditTaskValidator : AbstractValidator<EditTaskDto>
                     return;
                 }
 
-                bool exists = await mainDbContext.Tasks.AnyAsync(c => c.Title == title && c.ColumnId == task.ColumnId, ct);
+                bool exists = await mainDbContext.Tasks.AnyAsync(c => c.Title == title && c.ColumnId == task.ColumnId && c.Id != taskId, ct);
                 if (exists)
                 {
                     context.AddFailure("A task with this name already exists.");

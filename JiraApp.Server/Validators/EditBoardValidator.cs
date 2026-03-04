@@ -7,8 +7,26 @@ public class EditBoardValidator : AbstractValidator<EditBoardDto>
         RuleFor(x => x.Name)
             .NotEmpty()
             .MinimumLength(3)
-            .MustAsync(async (name, cancellation) =>
-                !await mainDbContext.Boards.AnyAsync(b => b.Name == name, cancellation))
-            .WithMessage("A board with this name already exists.");
+            .CustomAsync(async (name, context, cancellation) =>
+            {
+                context.RootContextData.TryGetValue("BoardId", out object? boardIdObject);
+                if (boardIdObject is null)
+                {
+                    context.AddFailure("Missing board Id.");
+                    return;
+                }
+
+                if (boardIdObject is not Guid boardId)
+                {
+                    context.AddFailure("Missing a valid board Id.");
+                    return;
+                }
+
+                bool exists = await mainDbContext.Boards.AnyAsync(b => b.Name == name && b.Id != boardId, cancellation);
+                if (exists)
+                {
+                    context.AddFailure("A board with this name already exists.");
+                }
+            });
     }
 }

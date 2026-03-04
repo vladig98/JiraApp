@@ -37,7 +37,10 @@ public class BoardsController(
     [HttpPut("{id:Guid}")]
     public async Task<ActionResult<BoardDto>> Update(EditBoardDto editBoardDto, Guid id, CancellationToken ct)
     {
-        ValidationResult validationResult = await editBoardValidator.ValidateAsync(editBoardDto, ct);
+        ValidationContext<EditBoardDto> context = new(editBoardDto);
+        context.RootContextData["BoardId"] = id;
+
+        ValidationResult validationResult = await editBoardValidator.ValidateAsync(context, ct);
         if (!validationResult.IsValid)
         {
             return BadRequest(validationResult.Errors);

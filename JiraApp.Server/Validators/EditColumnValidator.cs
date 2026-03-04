@@ -29,7 +29,7 @@ public class EditColumnValidator : AbstractValidator<EditColumnDto>
                     return;
                 }
 
-                bool exists = await mainDbContext.Columns.AnyAsync(c => c.Name == name && c.BoardId == column.BoardId, ct);
+                bool exists = await mainDbContext.Columns.AnyAsync(c => c.Name == name && c.BoardId == column.BoardId && c.Id != columnId, ct);
                 if (exists)
                 {
                     context.AddFailure("A column with this name already exists.");
