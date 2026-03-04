@@ -1,7 +1,7 @@
 ﻿namespace JiraApp.Server.Services;
 
 public class ColumnService(
-    MainDbContext mainDbContext, 
+    MainDbContext mainDbContext,
     ILogger<ColumnService> logger) : IColumnService
 {
     public async Task<Result<ColumnDto>> CreateColumnAsync(Guid boardId, CreateColumnDto createColumnDto, CancellationToken ct)
