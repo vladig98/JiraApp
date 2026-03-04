@@ -55,6 +55,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapHub<BoardHub>("/hubs/board");
+app.MapHub<ColumnHub>("/hubs/column");
+app.MapHub<TaskHub>("/hubs/task");
 app.MapControllers();
 app.MapFallbackToFile("/index.html");
 

@@ -1,5 +1,5 @@
 ﻿namespace JiraApp.Server.Hubs;
 
-public class BoardHub : Hub
+public class BoardHub : Hub<IBoardClient>
 {
 }

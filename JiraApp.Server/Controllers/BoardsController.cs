@@ -4,6 +4,7 @@
 [ApiController]
 public class BoardsController(
     IBoardsService boardsService,
+    IHubContext<BoardHub, IBoardClient> hubContext,
     IValidator<CreateBoardDto> createdBoardValidator,
     IValidator<EditBoardDto> editBoardValidator) : ControllerBase
 {
@@ -29,6 +30,7 @@ public class BoardsController(
             return StatusCodeBasedOnErrorType(boardResult);
         }
 
+        await hubContext.Clients.All.ReceiveBoardCreated(boardResult.Data);
         return Ok(boardResult.Data);
     }
 
@@ -47,6 +49,7 @@ public class BoardsController(
             return StatusCodeBasedOnErrorType(boardResult);
         }
 
+        await hubContext.Clients.All.ReceiveBoardUpdated(boardResult.Data);
         return Ok(boardResult.Data);
     }
 
@@ -59,6 +62,7 @@ public class BoardsController(
             return StatusCodeBasedOnErrorType(boardResult);
         }
 
+        await hubContext.Clients.All.ReceiveBoardDeleted(id);
         return NoContent();
     }
 

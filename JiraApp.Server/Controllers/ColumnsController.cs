@@ -4,7 +4,7 @@
 [ApiController]
 public class ColumnsController(
     IColumnService columnService,
-    IHubContext hubContext,
+    IHubContext<ColumnHub, IColumnClient> hubContext,
     IValidator<CreateColumnDto> createColumnValidator,
     IValidator<EditColumnDto> editColumnValidator,
     IValidator<ReorderColumnDto> reorderColumnValidator) : ControllerBase
@@ -27,6 +27,7 @@ public class ColumnsController(
             return StatusCodeBasedOnErrorType(columnResult);
         }
 
+        await hubContext.Clients.All.ReceiveColumnCreated(columnResult.Data);
         return Ok(columnResult.Data);
     }
 
@@ -48,6 +49,7 @@ public class ColumnsController(
             return StatusCodeBasedOnErrorType(columnResult);
         }
 
+        await hubContext.Clients.All.ReceiveColumnUpdated(columnResult.Data);
         return Ok(columnResult.Data);
     }
 
@@ -60,6 +62,7 @@ public class ColumnsController(
             return StatusCodeBasedOnErrorType(columnResult);
         }
 
+        await hubContext.Clients.All.ReceiveColumnDeleted(id);
         return NoContent();
     }
 
@@ -78,7 +81,7 @@ public class ColumnsController(
             return StatusCodeBasedOnErrorType(columnResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveColumnReordered), columnResult.Data, cancellationToken: ct);
+        await hubContext.Clients.All.ReceiveColumnMoved(columnResult.Data);
         return Ok(columnResult.Data);
     }
 

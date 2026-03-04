@@ -4,7 +4,7 @@
 [ApiController]
 public class TasksController(
     ITasksService tasksService,
-    IHubContext hubContext,
+    IHubContext<TaskHub, ITaskClient> hubContext,
     IValidator<CreateTaskDto> createTaskValidator,
     IValidator<EditTaskDto> editTaskValidator,
     IValidator<MoveTaskDto> moveTaskValidator,
@@ -28,7 +28,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskCreated), taskResult.Data, cancellationToken: ct);
+        await hubContext.Clients.All.ReceiveTaskCreated(taskResult.Data);
         return Ok(taskResult.Data);
     }
 
@@ -50,7 +50,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskUpdated), taskResult.Data, cancellationToken: ct);
+        await hubContext.Clients.All.ReceiveTaskUpdated(taskResult.Data);
         return Ok(taskResult.Data);
     }
 
@@ -63,7 +63,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskDeleted), cancellationToken: ct);
+        await hubContext.Clients.All.ReceiveTaskDeleted(id);
         return NoContent();
     }
 
@@ -82,7 +82,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskMoved), taskResult.Data, cancellationToken: ct);
+        await hubContext.Clients.All.ReceiveTaskMoved(taskResult.Data);
         return Ok(taskResult.Data);
     }
 
@@ -101,7 +101,7 @@ public class TasksController(
             return StatusCodeBasedOnErrorType(taskResult);
         }
 
-        await hubContext.Clients.All.SendAsync(nameof(HubEvents.ReceiveTaskMoved), taskResult.Data, cancellationToken: ct);
+        await hubContext.Clients.All.ReceiveTaskMoved(taskResult.Data);
         return Ok(taskResult.Data);
     }
 
