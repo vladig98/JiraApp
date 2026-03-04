@@ -4,11 +4,6 @@ public partial class BoardsService(
     MainDbContext mainDbContext,
     ILogger<BoardsService> logger) : IBoardsService
 {
-    [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "Starting transaction for board creation {Name}")]
-    static partial void LogBoardCreationStarted(ILogger logger, string name);
-
     public async Task<Result<BoardDto>> CreateBoardAsync(CreateBoardDto createBoardDto, CancellationToken ct)
     {
         logger.LogBoardCreationStarted(createBoardDto.Name);
