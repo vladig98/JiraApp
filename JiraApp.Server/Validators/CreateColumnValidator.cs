@@ -9,7 +9,7 @@ public class CreateColumnValidator : AbstractValidator<CreateColumnDto>
             .MinimumLength(3)
             .CustomAsync(async (name, context, ct) =>
             {
-                context.RootContextData.TryGetValue("BoardId", out object? boardIdObject);
+                context.RootContextData.TryGetValue(Constants.BoardId, out object? boardIdObject);
                 if (boardIdObject is null)
                 {
                     context.AddFailure("Missing board Id.");

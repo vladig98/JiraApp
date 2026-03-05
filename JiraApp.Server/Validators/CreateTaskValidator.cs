@@ -9,7 +9,7 @@ public class CreateTaskValidator : AbstractValidator<CreateTaskDto>
             .MinimumLength(3)
             .CustomAsync(async (title, context, ct) =>
             {
-                context.RootContextData.TryGetValue("ColumnId", out object? columnIdObject);
+                context.RootContextData.TryGetValue(Constants.ColumnId, out object? columnIdObject);
                 if (columnIdObject is null)
                 {
                     context.AddFailure("Missing column Id.");

@@ -6,7 +6,7 @@ public class BoardsController(
     IBoardsService boardsService,
     IHubContext<BoardHub, IBoardClient> hubContext,
     IValidator<CreateBoardDto> createdBoardValidator,
-    IValidator<EditBoardDto> editBoardValidator) : ControllerBase
+    IValidator<EditBoardDto> editBoardValidator) : BaseController
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<BoardDto>>> Retrieve(CancellationToken ct)
@@ -21,13 +21,13 @@ public class BoardsController(
         ValidationResult validationResult = await createdBoardValidator.ValidateAsync(createBoardDto, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            return BadRequest(validationResult.MapValidationError());
         }
 
         Result<BoardDto> boardResult = await boardsService.CreateBoardAsync(createBoardDto, ct);
         if (boardResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(boardResult);
+            return Problem(boardResult);
         }
 
         await hubContext.Clients.All.ReceiveBoardCreated(boardResult.Data);
@@ -38,18 +38,18 @@ public class BoardsController(
     public async Task<ActionResult<BoardDto>> Update(EditBoardDto editBoardDto, Guid id, CancellationToken ct)
     {
         ValidationContext<EditBoardDto> context = new(editBoardDto);
-        context.RootContextData["BoardId"] = id;
+        context.RootContextData[Constants.BoardId] = id;
 
         ValidationResult validationResult = await editBoardValidator.ValidateAsync(context, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            return BadRequest(validationResult.MapValidationError());
         }
 
         Result<BoardDto> boardResult = await boardsService.UpdateBoardAsync(editBoardDto, id, ct);
         if (boardResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(boardResult);
+            return Problem(boardResult);
         }
 
         await hubContext.Clients.All.ReceiveBoardUpdated(boardResult.Data);
@@ -62,19 +62,10 @@ public class BoardsController(
         BaseResult boardResult = await boardsService.DeleteBoardAsync(id, ct);
         if (boardResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(boardResult);
+            return Problem(boardResult);
         }
 
         await hubContext.Clients.All.ReceiveBoardDeleted(id);
         return NoContent();
-    }
-
-    private ObjectResult StatusCodeBasedOnErrorType(BaseResult boardResult)
-    {
-        return boardResult.ErrorType switch
-        {
-            ErrorType.NotFound => NotFound(boardResult.Error),
-            _ or ErrorType.Unexpected => StatusCode(500, boardResult.Error),
-        };
     }
 }

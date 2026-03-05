@@ -7,24 +7,24 @@ public class ColumnsController(
     IHubContext<ColumnHub, IColumnClient> hubContext,
     IValidator<CreateColumnDto> createColumnValidator,
     IValidator<EditColumnDto> editColumnValidator,
-    IValidator<ReorderColumnDto> reorderColumnValidator) : ControllerBase
+    IValidator<ReorderColumnDto> reorderColumnValidator) : BaseController
 {
     [HttpPost("/boards/{boardId:Guid}/columns")]
     public async Task<ActionResult<ColumnDto>> Create(Guid boardId, CreateColumnDto createColumnDto, CancellationToken ct)
     {
         ValidationContext<CreateColumnDto> context = new(createColumnDto);
-        context.RootContextData["BoardId"] = boardId;
+        context.RootContextData[Constants.BoardId] = boardId;
 
         ValidationResult validationResult = await createColumnValidator.ValidateAsync(context, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            return BadRequest(validationResult.MapValidationError());
         }
 
         Result<ColumnDto> columnResult = await columnService.CreateColumnAsync(boardId, createColumnDto, ct);
         if (columnResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(columnResult);
+            return Problem(columnResult);
         }
 
         await hubContext.Clients.All.ReceiveColumnCreated(columnResult.Data);
@@ -35,18 +35,18 @@ public class ColumnsController(
     public async Task<IActionResult> Update(Guid id, EditColumnDto editColumnDto, CancellationToken ct)
     {
         ValidationContext<EditColumnDto> context = new(editColumnDto);
-        context.RootContextData["ColumnId"] = id;
+        context.RootContextData[Constants.ColumnId] = id;
 
         ValidationResult validationResult = await editColumnValidator.ValidateAsync(context, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            return BadRequest(validationResult.MapValidationError());
         }
 
         Result<ColumnDto> columnResult = await columnService.UpdateColumnAsync(id, editColumnDto, ct);
         if (columnResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(columnResult);
+            return Problem(columnResult);
         }
 
         await hubContext.Clients.All.ReceiveColumnUpdated(columnResult.Data);
@@ -59,7 +59,7 @@ public class ColumnsController(
         BaseResult columnResult = await columnService.DeleteColumnAsync(id, ct);
         if (columnResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(columnResult);
+            return Problem(columnResult);
         }
 
         await hubContext.Clients.All.ReceiveColumnDeleted(id);
@@ -72,25 +72,16 @@ public class ColumnsController(
         ValidationResult validationResult = await reorderColumnValidator.ValidateAsync(reorderColumnDto, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            return BadRequest(validationResult.MapValidationError());
         }
 
         Result<ColumnDto> columnResult = await columnService.UpdateColumnOrderAsync(reorderColumnDto, ct);
         if (columnResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(columnResult);
+            return Problem(columnResult);
         }
 
         await hubContext.Clients.All.ReceiveColumnMoved(columnResult.Data);
         return Ok(columnResult.Data);
-    }
-
-    private ObjectResult StatusCodeBasedOnErrorType(BaseResult boardResult)
-    {
-        return boardResult.ErrorType switch
-        {
-            ErrorType.NotFound => NotFound(boardResult.Error),
-            _ or ErrorType.Unexpected => StatusCode(500, boardResult.Error),
-        };
     }
 }

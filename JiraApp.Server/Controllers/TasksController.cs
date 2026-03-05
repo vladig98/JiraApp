@@ -8,24 +8,24 @@ public class TasksController(
     IValidator<CreateTaskDto> createTaskValidator,
     IValidator<EditTaskDto> editTaskValidator,
     IValidator<MoveTaskDto> moveTaskValidator,
-    IValidator<ReorderTaskDto> reorderTaskValidator) : ControllerBase
+    IValidator<ReorderTaskDto> reorderTaskValidator) : BaseController
 {
     [HttpPost("/columns/{columnId:Guid}/tasks")]
     public async Task<IActionResult> Create(Guid columnId, CreateTaskDto createTaskDto, CancellationToken ct)
     {
         ValidationContext<CreateTaskDto> context = new(createTaskDto);
-        context.RootContextData["ColumnId"] = columnId;
+        context.RootContextData[Constants.ColumnId] = columnId;
 
         ValidationResult validationResult = await createTaskValidator.ValidateAsync(context, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            return BadRequest(validationResult.MapValidationError());
         }
 
         Result<TaskDto> taskResult = await tasksService.CreateTaskAsync(columnId, createTaskDto, ct);
         if (taskResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(taskResult);
+            return Problem(taskResult);
         }
 
         await hubContext.Clients.All.ReceiveTaskCreated(taskResult.Data);
@@ -36,18 +36,18 @@ public class TasksController(
     public async Task<IActionResult> Update(Guid id, EditTaskDto editTaskDto, CancellationToken ct)
     {
         ValidationContext<EditTaskDto> context = new(editTaskDto);
-        context.RootContextData["TaskId"] = id;
+        context.RootContextData[Constants.TaskId] = id;
 
         ValidationResult validationResult = await editTaskValidator.ValidateAsync(context, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            return BadRequest(validationResult.MapValidationError());
         }
 
         Result<TaskDto> taskResult = await tasksService.UpdateTaskAsync(id, editTaskDto, ct);
         if (taskResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(taskResult);
+            return Problem(taskResult);
         }
 
         await hubContext.Clients.All.ReceiveTaskUpdated(taskResult.Data);
@@ -60,7 +60,7 @@ public class TasksController(
         BaseResult taskResult = await tasksService.DeleteTaskAsync(id, ct);
         if (taskResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(taskResult);
+            return Problem(taskResult);
         }
 
         await hubContext.Clients.All.ReceiveTaskDeleted(id);
@@ -73,13 +73,13 @@ public class TasksController(
         ValidationResult validationResult = await moveTaskValidator.ValidateAsync(moveTaskDto, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            return BadRequest(validationResult.MapValidationError());
         }
 
         Result<TaskDto> taskResult = await tasksService.MoveTaskAsync(moveTaskDto, ct);
         if (taskResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(taskResult);
+            return Problem(taskResult);
         }
 
         await hubContext.Clients.All.ReceiveTaskMoved(taskResult.Data);
@@ -92,26 +92,16 @@ public class TasksController(
         ValidationResult validationResult = await reorderTaskValidator.ValidateAsync(reorderTaskDto, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            return BadRequest(validationResult.MapValidationError());
         }
 
         Result<TaskDto> taskResult = await tasksService.ReorderTaskAsync(reorderTaskDto, ct);
         if (taskResult.IsFailure)
         {
-            return StatusCodeBasedOnErrorType(taskResult);
+            return Problem(taskResult);
         }
 
         await hubContext.Clients.All.ReceiveTaskMoved(taskResult.Data);
         return Ok(taskResult.Data);
-    }
-
-    private ObjectResult StatusCodeBasedOnErrorType(BaseResult boardResult)
-    {
-        return boardResult.ErrorType switch
-        {
-            ErrorType.NotFound => NotFound(boardResult.Error),
-            ErrorType.Concurrency => Conflict(boardResult.Error),
-            _ or ErrorType.Unexpected => StatusCode(500, boardResult.Error),
-        };
     }
 }
