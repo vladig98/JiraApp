@@ -37,7 +37,7 @@ public class TasksService(
 
             await transaction.CommitAsync(ct);
 
-            return new TaskDto(task.Id, task.Title, task.Description, task.OrderIndex);
+            return new TaskDto(task.Id, task.Title, task.Description, task.OrderIndex, Convert.ToBase64String(task.Version));
         }
         catch (Exception ex)
         {
@@ -113,6 +113,7 @@ public class TasksService(
             return Result<TaskDto>.Failure($"Task '{moveTaskDto.Id}' does not exist.", ErrorType.NotFound);
         }
 
+        mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = Convert.FromBase64String(moveTaskDto.Version);
         using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
 
         try
@@ -140,7 +141,7 @@ public class TasksService(
 
             logger.LogTaskMovedAcrossColumns(moveTaskDto.Id, originalColumnId, moveTaskDto.ColumnId, moveTaskDto.OrderIndex);
 
-            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex);
+            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex, Convert.ToBase64String(task.Version));
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -172,9 +173,10 @@ public class TasksService(
 
         if (oldIndex == newIndex)
         {
-            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex);
+            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex, Convert.ToBase64String(task.Version));
         }
 
+        mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = Convert.FromBase64String(reorderTaskDto.Version);
         using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
 
         try
@@ -204,7 +206,7 @@ public class TasksService(
 
             logger.LogTaskReordered(reorderTaskDto.Id, oldIndex, newIndex);
 
-            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex);
+            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex, Convert.ToBase64String(task.Version));
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -235,13 +237,15 @@ public class TasksService(
                 return Result<TaskDto>.Failure($"Task '{id}' does not exist.", ErrorType.NotFound);
             }
 
+            mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = Convert.FromBase64String(updateTaskDto.Version);
+
             task.Title = updateTaskDto.Title;
             task.Description = updateTaskDto.Description;
             task.UpdatedAt = DateTime.UtcNow;
 
             await mainDbContext.SaveChangesAsync(ct);
 
-            return new TaskDto(task.Id, task.Title, task.Description, task.OrderIndex);
+            return new TaskDto(task.Id, task.Title, task.Description, task.OrderIndex, Convert.ToBase64String(task.Version));
         }
         catch (DbUpdateConcurrencyException)
         {
