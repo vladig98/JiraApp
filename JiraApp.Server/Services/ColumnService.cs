@@ -12,7 +12,7 @@ public class ColumnService(
         if (!boardExists)
         {
             logger.LogBoardNotFoundColumn(boardId);
-            return Result<ColumnDto>.Failure($"Board '{boardId}' does not exist.", ErrorType.NotFound);
+            return Result<ColumnDto>.Failure($"Board '{boardId}' not found.", ErrorType.NotFound);
         }
 
         await using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
@@ -56,7 +56,7 @@ public class ColumnService(
         if (columnInfo is null)
         {
             logger.LogColumnNotFound(id);
-            return BaseResult.Failure($"Column '{id}' does not exist.", ErrorType.NotFound);
+            return BaseResult.Failure($"Column '{id}' not found.", ErrorType.NotFound);
         }
 
         await using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
@@ -96,7 +96,7 @@ public class ColumnService(
         if (column is null)
         {
             logger.LogColumnNotFound(id);
-            return Result<ColumnDto>.Failure($"Column '{id}' does not exist.", ErrorType.NotFound);
+            return Result<ColumnDto>.Failure($"Column '{id}' not found.", ErrorType.NotFound);
         }
 
         column.Name = editColumnDto.Name;
@@ -113,7 +113,7 @@ public class ColumnService(
         if (column is null)
         {
             logger.LogColumnNotFound(reorderColumnDto.Id);
-            return Result<ColumnDto>.Failure($"Column '{reorderColumnDto.Id}' does not exist.", ErrorType.NotFound);
+            return Result<ColumnDto>.Failure($"Column '{reorderColumnDto.Id}' not found.", ErrorType.NotFound);
         }
 
         int oldIndex = column.OrderIndex;

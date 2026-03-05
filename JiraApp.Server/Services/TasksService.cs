@@ -12,7 +12,7 @@ public class TasksService(
         if (!columnExists)
         {
             logger.LogColumnNotFoundForTask(columnId);
-            return Result<TaskDto>.Failure($"Column '{columnId}' does not exist.", ErrorType.NotFound);
+            return Result<TaskDto>.Failure($"Column '{columnId}' not found.", ErrorType.NotFound);
         }
 
         using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
@@ -58,7 +58,7 @@ public class TasksService(
         if (taskInfo is null)
         {
             logger.LogTaskNotFound(id);
-            return BaseResult.Failure($"Task '{id}' does not exist.", ErrorType.NotFound);
+            return BaseResult.Failure($"Task '{id}' not found.", ErrorType.NotFound);
         }
 
         using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
@@ -103,14 +103,14 @@ public class TasksService(
         bool columnExists = await mainDbContext.Columns.AnyAsync(x => x.Id == moveTaskDto.ColumnId, ct);
         if (!columnExists)
         {
-            return Result<TaskDto>.Failure($"Column '{moveTaskDto.ColumnId}' does not exist.", ErrorType.NotFound);
+            return Result<TaskDto>.Failure($"Column '{moveTaskDto.ColumnId}' not found.", ErrorType.NotFound);
         }
 
         TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == moveTaskDto.Id, ct);
         if (task is null)
         {
             logger.LogTaskNotFound(moveTaskDto.Id);
-            return Result<TaskDto>.Failure($"Task '{moveTaskDto.Id}' does not exist.", ErrorType.NotFound);
+            return Result<TaskDto>.Failure($"Task '{moveTaskDto.Id}' not found.", ErrorType.NotFound);
         }
 
         mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = Convert.FromBase64String(moveTaskDto.Version);
@@ -165,7 +165,7 @@ public class TasksService(
         if (task is null)
         {
             logger.LogTaskNotFound(reorderTaskDto.Id);
-            return Result<TaskDto>.Failure($"Task '{reorderTaskDto.Id}' does not exist.", ErrorType.NotFound);
+            return Result<TaskDto>.Failure($"Task '{reorderTaskDto.Id}' not found.", ErrorType.NotFound);
         }
 
         int oldIndex = task.OrderIndex;
@@ -234,7 +234,7 @@ public class TasksService(
             if (task is null)
             {
                 logger.LogTaskNotFound(id);
-                return Result<TaskDto>.Failure($"Task '{id}' does not exist.", ErrorType.NotFound);
+                return Result<TaskDto>.Failure($"Task '{id}' not found.", ErrorType.NotFound);
             }
 
             mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = Convert.FromBase64String(updateTaskDto.Version);
