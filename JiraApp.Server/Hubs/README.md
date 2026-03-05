@@ -1,22 +1,22 @@
-\# SignalR Event Contracts
+# SignalR Event Contracts
 
 This document defines the real-time event payloads sent from the Server to the Client. All events use **strongly typed payloads** via `Context.Clients.All.SendAsync()`.
 
-\## 1. Board Events (`BoardHub`)
+## 1. Board Events (`BoardHub`)
 | Method | Payload Shape | Description |
 | :--- | :--- | :--- |
 | `ReceiveBoardCreated` | `BoardDto` | Sent when a new board is initialized. |
 | `ReceiveBoardUpdated` | `BoardDto` | Updates board name or global ordering. |
 | `ReceiveBoardDeleted` | `Guid (id)` | Instructs client to remove board from view. |
 
-\## 2. Column Events (`ColumnHub`)
+## 2. Column Events (`ColumnHub`)
 | Method | Payload Shape | Description |
 | :--- | :--- | :--- |
 | `ReceiveColumnCreated`| `ColumnDto` | New column added to the active board. |
 | `ReceiveColumnMoved`  | `ColumnDto` | Contains the new `OrderIndex`. |
 | `ReceiveColumnDeleted`| `Guid (id)` | Removes column and all nested tasks. |
 
-\## 3. Task Events (`TaskHub`)
+## 3. Task Events (`TaskHub`)
 | Method | Payload Shape | Description |
 | :--- | :--- | :--- |
 | `ReceiveTaskCreated`  | `TaskDto` | New task added to a column. |
@@ -27,7 +27,7 @@ This document defines the real-time event payloads sent from the Server to the C
 
 ### Implementation Details (C# Interfaces)
 
-\```csharp
+```csharp
 namespace JiraApp.Server.Hubs.Interfaces;
 
 public interface IBoardClient
@@ -71,4 +71,4 @@ public interface ITaskClient
     /// <summary> Broadcasts updated OrderIndex and ColumnId for state reconciliation. </summary>
     Task ReceiveTaskMoved(TaskDto task);
 }
-\```
+```
