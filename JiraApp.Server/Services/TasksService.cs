@@ -44,7 +44,7 @@ public class TasksService(
             await transaction.RollbackAsync(ct);
             logger.LogTaskCreationError(createTaskDto.Title, ex.Message);
 
-            throw;
+            return Result<TaskDto>.Failure("An error occurred during creation.", ErrorType.Unexpected);
         }
     }
 
@@ -94,7 +94,7 @@ public class TasksService(
             await transaction.RollbackAsync(ct);
             logger.LogTaskDeleteError(id, ex.Message);
 
-            throw;
+            return Result<TaskDto>.Failure("An error occurred during deletion.", ErrorType.Unexpected);
         }
     }
 
@@ -154,7 +154,7 @@ public class TasksService(
             await transaction.RollbackAsync(ct);
             logger.LogTaskMoveError(moveTaskDto.Id, ex.Message);
 
-            throw;
+            return Result<TaskDto>.Failure("An error occurred during move.", ErrorType.Unexpected);
         }
     }
 
@@ -218,7 +218,7 @@ public class TasksService(
             await transaction.RollbackAsync(ct);
             logger.LogTaskMoveError(reorderTaskDto.Id, ex.Message);
 
-            throw;
+            return Result<TaskDto>.Failure("An error occurred during reorder.", ErrorType.Unexpected);
         }
     }
 
@@ -253,7 +253,7 @@ public class TasksService(
         {
             logger.LogTaskUpdateError(id, ex.Message);
 
-            throw;
+            return Result<TaskDto>.Failure("An error occurred during update.", ErrorType.Unexpected);
         }
     }
 }

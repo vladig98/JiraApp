@@ -42,7 +42,7 @@ public class ColumnService(
             await transaction.RollbackAsync(ct);
             logger.LogColumnCreationError(createColumnDto.Name, ex.Message);
 
-            throw;
+            return Result<ColumnDto>.Failure("An error occurred during creation.", ErrorType.Unexpected);
         }
     }
 
@@ -85,7 +85,7 @@ public class ColumnService(
             await transaction.RollbackAsync(ct);
             logger.LogColumnDeletionError(id, ex.Message);
 
-            throw;
+            return Result<ColumnDto>.Failure("An error occurred during deletion.", ErrorType.Unexpected);
         }
     }
 
@@ -160,7 +160,7 @@ public class ColumnService(
             await transaction.RollbackAsync(ct);
             logger.LogColumnReorderError(reorderColumnDto.Id, ex.Message);
 
-            throw;
+            return Result<ColumnDto>.Failure("An error occurred during update.", ErrorType.Unexpected);
         }
     }
 }
