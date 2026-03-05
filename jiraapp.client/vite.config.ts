@@ -7,6 +7,10 @@ import path from 'path';
 import child_process from 'child_process';
 import { env } from 'process';
 
+// Custom imports
+import tailwindcss from '@tailwindcss/vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
+
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
         ? `${env.APPDATA}/ASP.NET/https`
@@ -39,7 +43,14 @@ const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_H
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [plugin()],
+    plugins: [
+        tailwindcss(),
+        tanstackRouter({
+            target: 'react',
+            autoCodeSplitting: true
+        }),
+        plugin()
+    ],
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -48,6 +59,18 @@ export default defineConfig({
     server: {
         proxy: {
             '^/weatherforecast': {
+                target,
+                secure: false
+            },
+            '^/boards': {
+                target,
+                secure: false
+            },
+            '^/columns': {
+                target,
+                secure: false
+            },
+            '^/tasks': {
                 target,
                 secure: false
             }
