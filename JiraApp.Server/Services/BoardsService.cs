@@ -27,7 +27,7 @@ public partial class BoardsService(
 
             await transaction.CommitAsync(ct);
 
-            return new BoardDto(board.Id, board.Name, board.OrderIndex, now, now);
+            return board.ToDto();
         }
         catch (Exception ex)
         {
@@ -88,7 +88,7 @@ public partial class BoardsService(
         return await mainDbContext.Boards
                 .AsNoTracking()
                 .OrderBy(x => x.OrderIndex)
-                .Select(x => new BoardDto(x.Id, x.Name, x.OrderIndex, x.CreatedAt, x.UpdatedAt))
+                .Select(x => x.ToDto())
                 .ToListAsync(token);
     }
 
@@ -106,6 +106,6 @@ public partial class BoardsService(
         await mainDbContext.SaveChangesAsync(ct);
         logger.LogBoardUpdated(id, editBoardDto.Name);
 
-        return new BoardDto(board.Id, board.Name, board.OrderIndex, board.CreatedAt, board.UpdatedAt);
+        return board.ToDto();
     }
 }

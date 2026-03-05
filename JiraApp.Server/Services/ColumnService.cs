@@ -35,7 +35,7 @@ public class ColumnService(
 
             await transaction.CommitAsync(ct);
 
-            return new ColumnDto(column.Id, column.Name, column.OrderIndex, column.CreatedAt, column.UpdatedAt);
+            return column.ToDto();
         }
         catch (Exception ex)
         {
@@ -104,7 +104,7 @@ public class ColumnService(
 
         await mainDbContext.SaveChangesAsync(ct);
 
-        return new ColumnDto(column.Id, column.Name, column.OrderIndex, column.CreatedAt, column.UpdatedAt);
+        return column.ToDto();
     }
 
     public async Task<Result<ColumnDto>> UpdateColumnOrderAsync(ReorderColumnDto reorderColumnDto, CancellationToken ct)
@@ -121,7 +121,7 @@ public class ColumnService(
 
         if (oldIndex == newIndex)
         {
-            return new ColumnDto(column.Id, column.Name, column.OrderIndex, column.CreatedAt, column.UpdatedAt);
+            return column.ToDto();
         }
 
         await using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
@@ -153,7 +153,7 @@ public class ColumnService(
 
             logger.LogColumnReordered(column.Id, oldIndex, newIndex);
 
-            return new ColumnDto(column.Id, column.Name, column.OrderIndex, column.CreatedAt, column.UpdatedAt);
+            return column.ToDto();
         }
         catch (Exception ex)
         {

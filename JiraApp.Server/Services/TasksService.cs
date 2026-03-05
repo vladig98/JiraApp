@@ -37,7 +37,7 @@ public class TasksService(
 
             await transaction.CommitAsync(ct);
 
-            return new TaskDto(task.Id, task.Title, task.Description, task.OrderIndex, Convert.ToBase64String(task.Version));
+            return task.ToDto();
         }
         catch (Exception ex)
         {
@@ -141,7 +141,7 @@ public class TasksService(
 
             logger.LogTaskMovedAcrossColumns(moveTaskDto.Id, originalColumnId, moveTaskDto.ColumnId, moveTaskDto.OrderIndex);
 
-            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex, Convert.ToBase64String(task.Version));
+            return task.ToDto();
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -173,7 +173,7 @@ public class TasksService(
 
         if (oldIndex == newIndex)
         {
-            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex, Convert.ToBase64String(task.Version));
+            return task.ToDto();
         }
 
         mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = Convert.FromBase64String(reorderTaskDto.Version);
@@ -206,7 +206,7 @@ public class TasksService(
 
             logger.LogTaskReordered(reorderTaskDto.Id, oldIndex, newIndex);
 
-            return new TaskDto(task.Id, task.Title, task.Description ?? string.Empty, task.OrderIndex, Convert.ToBase64String(task.Version));
+            return task.ToDto();
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -245,7 +245,7 @@ public class TasksService(
 
             await mainDbContext.SaveChangesAsync(ct);
 
-            return new TaskDto(task.Id, task.Title, task.Description, task.OrderIndex, Convert.ToBase64String(task.Version));
+            return task.ToDto();
         }
         catch (DbUpdateConcurrencyException)
         {

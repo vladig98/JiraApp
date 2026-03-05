@@ -8,4 +8,7 @@ public class ColumnModel : BaseModel
     public required string Name { get; set; }
 
     public ICollection<TaskModel> Tasks { get; set; } = [];
+
+    public ColumnDto ToDto()
+        => new(Id, Name, OrderIndex, CreatedAt, UpdatedAt);
 }
