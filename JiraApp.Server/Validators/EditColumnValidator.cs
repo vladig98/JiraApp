@@ -25,7 +25,7 @@ public class EditColumnValidator : AbstractValidator<EditColumnDto>
                 ColumnModel? column = await mainDbContext.Columns.FirstOrDefaultAsync(x => x.Id == columnId, ct);
                 if (column is null)
                 {
-                    context.AddFailure($"Column with id {columnId} does not exist.");
+                    context.AddFailure($"Column '{columnId}' not found.");
                     return;
                 }
 

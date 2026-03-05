@@ -25,7 +25,7 @@ public class EditTaskValidator : AbstractValidator<EditTaskDto>
                 TaskModel? task = await mainDbContext.Tasks.FirstOrDefaultAsync(x => x.Id == taskId, ct);
                 if (task is null)
                 {
-                    context.AddFailure($"Task with id {taskId} does not exist.");
+                    context.AddFailure($"Task '{taskId}' not found.");
                     return;
                 }
 
