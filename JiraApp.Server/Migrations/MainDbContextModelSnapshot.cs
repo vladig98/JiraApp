@@ -8,142 +8,147 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace JiraApp.Server.Migrations;
-
-[DbContext(typeof(MainDbContext))]
-partial class MainDbContextModelSnapshot : ModelSnapshot
+namespace JiraApp.Server.Migrations
 {
-    protected override void BuildModel(ModelBuilder modelBuilder)
+    [DbContext(typeof(MainDbContext))]
+    partial class MainDbContextModelSnapshot : ModelSnapshot
     {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
 #pragma warning disable 612, 618
-        modelBuilder
-            .HasAnnotation("ProductVersion", "10.0.3")
-            .HasAnnotation("Relational:MaxIdentifierLength", 63);
+            modelBuilder
+                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-        NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-        modelBuilder.Entity("JiraApp.Server.Models.BoardModel", b =>
-        {
-            b.Property<Guid>("Id")
-                .ValueGeneratedOnAdd()
-                .HasColumnType("uuid");
+            modelBuilder.Entity("JiraApp.Server.Models.BoardModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-            b.Property<DateTime>("CreatedAt")
-                .HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-            b.Property<string>("Name")
-                .IsRequired()
-                .HasColumnType("text");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-            b.Property<int>("OrderIndex")
-                .HasColumnType("integer");
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
 
-            b.Property<DateTime>("UpdatedAt")
-                .HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-            b.HasKey("Id");
+                    b.HasKey("Id");
 
-            b.ToTable("Boards");
-        });
+                    b.ToTable("Boards");
+                });
 
-        modelBuilder.Entity("JiraApp.Server.Models.ColumnModel", b =>
-        {
-            b.Property<Guid>("Id")
-                .ValueGeneratedOnAdd()
-                .HasColumnType("uuid");
+            modelBuilder.Entity("JiraApp.Server.Models.ColumnModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-            b.Property<Guid>("BoardId")
-                .HasColumnType("uuid");
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uuid");
 
-            b.Property<DateTime>("CreatedAt")
-                .HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-            b.Property<string>("Name")
-                .IsRequired()
-                .HasColumnType("text");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-            b.Property<int>("OrderIndex")
-                .HasColumnType("integer");
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
 
-            b.Property<DateTime>("UpdatedAt")
-                .HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-            b.HasKey("Id");
+                    b.HasKey("Id");
 
-            b.HasIndex("BoardId");
+                    b.HasIndex("BoardId");
 
-            b.ToTable("Columns");
-        });
+                    b.ToTable("Columns");
+                });
 
-        modelBuilder.Entity("JiraApp.Server.Models.TaskModel", b =>
-        {
-            b.Property<Guid>("Id")
-                .ValueGeneratedOnAdd()
-                .HasColumnType("uuid");
+            modelBuilder.Entity("JiraApp.Server.Models.TaskModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-            b.Property<Guid>("ColumnId")
-                .HasColumnType("uuid");
+                    b.Property<Guid>("ColumnId")
+                        .HasColumnType("uuid");
 
-            b.Property<DateTime>("CreatedAt")
-                .HasColumnType("timestamp with time zone");
+                    b.Property<uint>("ConcurrencyVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
-            b.Property<string>("Description")
-                .HasColumnType("text");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-            b.Property<int>("OrderIndex")
-                .HasColumnType("integer");
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
 
-            b.Property<string>("Title")
-                .IsRequired()
-                .HasColumnType("text");
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
 
-            b.Property<DateTime>("UpdatedAt")
-                .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-            b.Property<byte[]>("Version")
-                .IsConcurrencyToken()
-                .IsRequired()
-                .ValueGeneratedOnAddOrUpdate()
-                .HasColumnType("bytea");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-            b.HasKey("Id");
+                    b.Property<byte[]>("Version")
+                        .IsRequired()
+                        .HasColumnType("bytea");
 
-            b.HasIndex("ColumnId");
+                    b.HasKey("Id");
 
-            b.ToTable("Tasks");
-        });
+                    b.HasIndex("ColumnId");
 
-        modelBuilder.Entity("JiraApp.Server.Models.ColumnModel", b =>
-        {
-            b.HasOne("JiraApp.Server.Models.BoardModel", "Board")
-                .WithMany("Columns")
-                .HasForeignKey("BoardId")
-                .OnDelete(DeleteBehavior.Restrict)
-                .IsRequired();
+                    b.ToTable("Tasks");
+                });
 
-            b.Navigation("Board");
-        });
+            modelBuilder.Entity("JiraApp.Server.Models.ColumnModel", b =>
+                {
+                    b.HasOne("JiraApp.Server.Models.BoardModel", "Board")
+                        .WithMany("Columns")
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-        modelBuilder.Entity("JiraApp.Server.Models.TaskModel", b =>
-        {
-            b.HasOne("JiraApp.Server.Models.ColumnModel", "Column")
-                .WithMany("Tasks")
-                .HasForeignKey("ColumnId")
-                .OnDelete(DeleteBehavior.Restrict)
-                .IsRequired();
+                    b.Navigation("Board");
+                });
 
-            b.Navigation("Column");
-        });
+            modelBuilder.Entity("JiraApp.Server.Models.TaskModel", b =>
+                {
+                    b.HasOne("JiraApp.Server.Models.ColumnModel", "Column")
+                        .WithMany("Tasks")
+                        .HasForeignKey("ColumnId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-        modelBuilder.Entity("JiraApp.Server.Models.BoardModel", b =>
-        {
-            b.Navigation("Columns");
-        });
+                    b.Navigation("Column");
+                });
 
-        modelBuilder.Entity("JiraApp.Server.Models.ColumnModel", b =>
-        {
-            b.Navigation("Tasks");
-        });
+            modelBuilder.Entity("JiraApp.Server.Models.BoardModel", b =>
+                {
+                    b.Navigation("Columns");
+                });
+
+            modelBuilder.Entity("JiraApp.Server.Models.ColumnModel", b =>
+                {
+                    b.Navigation("Tasks");
+                });
 #pragma warning restore 612, 618
+        }
     }
 }
