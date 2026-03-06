@@ -1,43 +1,53 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useBoardStore } from '../../stores/useBoardStore';
-import type Board from '../../types/board';
-import ErrorToast from '../../errorToast';
+import { useBoardStore } from '../../../stores/useBoardStore';
+import type Board from '../../../types/board';
+import ErrorToast from '../../../errorToast';
 
-export const Route = createFileRoute('/boards/create')({
-    component: CreateBoardForm,
+export const Route = createFileRoute('/boards/update/$boardId')({
+    component: EditBoardForm,
 })
 
-function CreateBoardForm() {
+function EditBoardForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [apiError, setApiError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const { boardId } = Route.useParams()
+
+    const getBoard = useBoardStore((state) => state.getBoard);
+    const board = getBoard(boardId) as Board;
     const upsertBoard = useBoardStore((state) => state.upsert);
 
+    const [name, setName] = useState(board?.name);
+
     async function handleSubmit(formData: FormData) {
-        const name = formData.get('boardName') as string;
-        if (!name || name.trim().length === 0) {
+        setIsSubmitting(true);
+
+        // Optimistic update
+        const originalBoard = getBoard(boardId);
+        if (!originalBoard) {
             return;
         }
 
-        setIsSubmitting(true);
+        const updatedBoard = { ...originalBoard, name: name.trim() };
+        upsertBoard(updatedBoard);
+
         try {
-            const response = await fetch('/boards', {
-                method: 'POST',
+            const response = await fetch("/boards/" + boardId, {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name.trim() })
+                body: JSON.stringify({ name: name?.trim() })
             });
 
             if (!response.ok) {
                 throw new Error();
             }
 
-            const newBoard = await response.json() as Board;
-
-            upsertBoard(newBoard);
-            navigate({ to: '/' });
+            navigate({ to: '/boards/$boardId', params: boardId });
         } catch (error) {
-            setApiError("The server rejected the board creation. No changes have been made.");
+            // Revert the optimistic update
+            setApiError("The server rejected the new board name. Changes have been reverted.");
+            upsertBoard(originalBoard);
         } finally {
             setIsSubmitting(false);
         }
@@ -48,8 +58,8 @@ function CreateBoardForm() {
             <ErrorToast message={apiError} onDismiss={() => setApiError(null)} />
             <div className="flex flex-col min-h-full">
                 <header className="px-8 py-6 border-b border-slate-200 bg-white">
-                    <nav className="text-xs text-slate-500 mb-1">Projects / Boards / Create</nav>
-                    <h1 className="text-2xl font-semibold text-slate-900">Create Board</h1>
+                    <nav className="text-xs text-slate-500 mb-1">Projects / Boards / Update / {boardId}</nav>
+                    <h1 className="text-2xl font-semibold text-slate-900">Edit Board</h1>
                 </header>
 
                 <div className="p-8 flex-1 bg-slate-50/50">
@@ -65,6 +75,8 @@ function CreateBoardForm() {
                                         type="text"
                                         required
                                         autoFocus
+                                        value={name}
+                                        onChange={e => setName(e.target.value)}
                                         placeholder="e.g. Q1 Optimization Engine"
                                         className="w-full px-4 py-3 bg-white border border-slate-300 rounded text-slate-900 text-lg focus:outline-none focus:ring-2 focus:ring-[#0052CC] focus:border-transparent transition-all shadow-sm"
                                     />
@@ -89,10 +101,10 @@ function CreateBoardForm() {
                                         {isSubmitting ? (
                                             <>
                                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                Creating...
+                                                Updating...
                                             </>
                                         ) : (
-                                            'Create Board'
+                                            'Update Board'
                                         )}
                                     </button>
                                 </div>

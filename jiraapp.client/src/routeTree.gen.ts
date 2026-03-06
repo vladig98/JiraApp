@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BoardsCreateRouteImport } from './routes/boards/create'
 import { Route as BoardsBoardIdRouteImport } from './routes/boards/$boardId'
+import { Route as BoardsUpdateBoardIdRouteImport } from './routes/boards/update/$boardId'
+import { Route as BoardsDeleteBoardIdRouteImport } from './routes/boards/delete/$boardId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +30,69 @@ const BoardsBoardIdRoute = BoardsBoardIdRouteImport.update({
   path: '/boards/$boardId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BoardsUpdateBoardIdRoute = BoardsUpdateBoardIdRouteImport.update({
+  id: '/boards/update/$boardId',
+  path: '/boards/update/$boardId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoardsDeleteBoardIdRoute = BoardsDeleteBoardIdRouteImport.update({
+  id: '/boards/delete/$boardId',
+  path: '/boards/delete/$boardId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/boards/$boardId': typeof BoardsBoardIdRoute
   '/boards/create': typeof BoardsCreateRoute
+  '/boards/delete/$boardId': typeof BoardsDeleteBoardIdRoute
+  '/boards/update/$boardId': typeof BoardsUpdateBoardIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/boards/$boardId': typeof BoardsBoardIdRoute
   '/boards/create': typeof BoardsCreateRoute
+  '/boards/delete/$boardId': typeof BoardsDeleteBoardIdRoute
+  '/boards/update/$boardId': typeof BoardsUpdateBoardIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/boards/$boardId': typeof BoardsBoardIdRoute
   '/boards/create': typeof BoardsCreateRoute
+  '/boards/delete/$boardId': typeof BoardsDeleteBoardIdRoute
+  '/boards/update/$boardId': typeof BoardsUpdateBoardIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/boards/$boardId' | '/boards/create'
+  fullPaths:
+    | '/'
+    | '/boards/$boardId'
+    | '/boards/create'
+    | '/boards/delete/$boardId'
+    | '/boards/update/$boardId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/boards/$boardId' | '/boards/create'
-  id: '__root__' | '/' | '/boards/$boardId' | '/boards/create'
+  to:
+    | '/'
+    | '/boards/$boardId'
+    | '/boards/create'
+    | '/boards/delete/$boardId'
+    | '/boards/update/$boardId'
+  id:
+    | '__root__'
+    | '/'
+    | '/boards/$boardId'
+    | '/boards/create'
+    | '/boards/delete/$boardId'
+    | '/boards/update/$boardId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BoardsBoardIdRoute: typeof BoardsBoardIdRoute
   BoardsCreateRoute: typeof BoardsCreateRoute
+  BoardsDeleteBoardIdRoute: typeof BoardsDeleteBoardIdRoute
+  BoardsUpdateBoardIdRoute: typeof BoardsUpdateBoardIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +118,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BoardsBoardIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/boards/update/$boardId': {
+      id: '/boards/update/$boardId'
+      path: '/boards/update/$boardId'
+      fullPath: '/boards/update/$boardId'
+      preLoaderRoute: typeof BoardsUpdateBoardIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/boards/delete/$boardId': {
+      id: '/boards/delete/$boardId'
+      path: '/boards/delete/$boardId'
+      fullPath: '/boards/delete/$boardId'
+      preLoaderRoute: typeof BoardsDeleteBoardIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +139,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BoardsBoardIdRoute: BoardsBoardIdRoute,
   BoardsCreateRoute: BoardsCreateRoute,
+  BoardsDeleteBoardIdRoute: BoardsDeleteBoardIdRoute,
+  BoardsUpdateBoardIdRoute: BoardsUpdateBoardIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

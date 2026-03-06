@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { BoardActionDropdown } from '../components/BoardActionDropdown'
-import type Board from '../types/Board'
+import type Board from '../types/board'
+import { useBoardStore } from '../stores/useBoardStore'
 
 export const Route = createFileRoute('/')({
     component: BoardList,
@@ -11,18 +11,38 @@ export const Route = createFileRoute('/')({
 function BoardList() {
     const [boards, setBoards] = useState<Board[] | undefined>(undefined)
     const [isFetching, setIsFetching] = useState(false)
+    const upsertBoard = useBoardStore((state) => state.upsert);
+    const anyBoard = useBoardStore((state) => state.any);
+    const getAllBoards = useBoardStore((state) => state.getAll);
 
     useEffect(() => {
         populateBoards()
     }, [])
 
     async function populateBoards() {
+        if (anyBoard()) {
+            const boardsFromState = getAllBoards();
+            setBoards(boardsFromState);
+
+            return;
+        }
+
         setIsFetching(true)
         try {
             const response = await fetch('boards')
-            if (response.ok) {
-                const data = await response.json() as Board[]
-                setBoards([...data].sort((a, b) => a.orderIndex - b.orderIndex))
+            console.log(response)
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            const data = await response.json() as Board[]
+            const sorted = [...data].sort((a, b) => a.orderIndex - b.orderIndex);
+
+            console.log(data)
+
+            setBoards(sorted)
+            for (const b of sorted) {
+                upsertBoard(b);
             }
         } catch (error) {
             setBoards([])
@@ -59,7 +79,6 @@ function BoardList() {
                     </div>
                 ) : (
                     <div className="flex flex-col gap-1">
-                        {/* Header Row */}
                         <div className="grid grid-cols-12 px-6 py-3 text-xs uppercase text-slate-500 font-semibold bg-slate-50 border border-slate-200 rounded-t-lg">
                             <div className="col-span-6">Name</div>
                             <div className="col-span-2">Created (UTC)</div>
@@ -67,28 +86,44 @@ function BoardList() {
                             <div className="col-span-1 text-right">Actions</div>
                         </div>
 
-                        {/* Data Rows */}
                         <div className="flex flex-col border-x border-b border-slate-200 rounded-b-lg divide-y divide-slate-100 bg-white shadow-sm">
                             {boards.map((board) => (
-                                <Link
-                                    key={board.id}
-                                    to="/boards/$boardId"
-                                    params={{ boardId: board.id }}
-                                    className="grid grid-cols-12 px-6 py-4 items-center hover:bg-blue-50/50 transition-colors group"
-                                >
-                                    <div className="col-span-6 font-medium text-[#0052CC] group-hover:underline">
-                                        {board.name}
+                                <div key={board.id} className="grid grid-cols-12 items-center hover:bg-blue-50/50 transition-colors group">
+                                    <Link
+                                        to="/boards/$boardId"
+                                        params={{ boardId: board.id }}
+                                        className="col-span-11 grid grid-cols-11 px-6 py-4 items-center"
+                                    >
+                                        <div className="col-span-6 font-medium text-[#0052CC] group-hover:underline">
+                                            {board.name}
+                                        </div>
+                                        <div className="col-span-2 text-sm text-slate-500">
+                                            {new Date(board.createdAt).toLocaleString()}
+                                        </div>
+                                        <div className="col-span-3 text-sm text-slate-500">
+                                            {new Date(board.updatedAt).toLocaleString()}
+                                        </div>
+                                    </Link>
+
+                                    <div className="col-span-1 pr-6 flex justify-end gap-1">
+                                        <Link
+                                            to="/boards/update/$boardId"
+                                            params={{ boardId: board.id }}
+                                            className="p-2 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors"
+                                            title="Update"
+                                        >
+                                            <span className="text-lg">✎</span>
+                                        </Link>
+                                        <Link
+                                            to="/boards/delete/$boardId"
+                                            params={{ boardId: board.id }}
+                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                            title="Delete"
+                                        >
+                                            <span className="text-lg">🗑</span>
+                                        </Link>
                                     </div>
-                                    <div className="col-span-2 text-sm text-slate-500">
-                                        {new Date(board.createdAt).toLocaleDateString()}
-                                    </div>
-                                    <div className="col-span-3 text-sm text-slate-500">
-                                        {new Date(board.updatedAt).toLocaleDateString()}
-                                    </div>
-                                    <div className="col-span-1 text-right relative">
-                                        <BoardActionDropdown boardId={board.id} />
-                                    </div>
-                                </Link>
+                                </div>
                             ))}
                         </div>
                     </div>
