@@ -1,3 +1,3 @@
 ﻿namespace JiraApp.Server.Dtos.Tasks;
 
-public sealed record class ReorderTaskDto(Guid Id, int OrderIndex, string Version);
+public sealed record class ReorderTaskDto(Guid Id, int OrderIndex, uint Version);

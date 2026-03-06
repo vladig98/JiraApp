@@ -113,7 +113,7 @@ public class TasksService(
             return Result<TaskDto>.Failure($"Task '{moveTaskDto.Id}' not found.", ErrorType.NotFound);
         }
 
-        mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = Convert.FromBase64String(moveTaskDto.Version);
+        mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = moveTaskDto.Version;
         using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
 
         try
@@ -176,7 +176,7 @@ public class TasksService(
             return task.ToDto();
         }
 
-        mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = Convert.FromBase64String(reorderTaskDto.Version);
+        mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = reorderTaskDto.Version;
         using IDbContextTransaction transaction = await mainDbContext.Database.BeginTransactionAsync(ct);
 
         try
@@ -237,7 +237,7 @@ public class TasksService(
                 return Result<TaskDto>.Failure($"Task '{id}' not found.", ErrorType.NotFound);
             }
 
-            mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = Convert.FromBase64String(updateTaskDto.Version);
+            mainDbContext.Entry(task).Property(nameof(TaskModel.Version)).OriginalValue = updateTaskDto.Version;
 
             task.Title = updateTaskDto.Title;
             task.Description = updateTaskDto.Description;
