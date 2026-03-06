@@ -7,5 +7,5 @@ public class BoardModel : BaseModel
     public ICollection<ColumnModel> Columns { get; set; } = [];
 
     public BoardDto ToDto()
-        => new(Id, Name, OrderIndex, CreatedAt, UpdatedAt);
+        => new(Id, Name, OrderIndex, CreatedAt, UpdatedAt, Columns.Select(x => x.ToDto()));
 }

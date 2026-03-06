@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -59,5 +61,12 @@ app.MapHub<ColumnHub>("/hubs/column");
 app.MapHub<TaskHub>("/hubs/task");
 app.MapControllers();
 app.MapFallbackToFile("/index.html");
+
+ProcessStartInfo ps = new("https://localhost:7110/scalar/")
+{
+    UseShellExecute = true,
+    Verb = "open"
+};
+Process.Start(ps);
 
 app.Run();

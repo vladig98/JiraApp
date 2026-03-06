@@ -8,8 +8,8 @@ public class TaskModel : BaseModel
     public required string Title { get; set; }
     public string? Description { get; set; }
 
-    public byte[] Version { get; set; } = null!;
+    public uint Version { get; set; }
 
     public TaskDto ToDto()
-        => new(Id, Title, Description ?? string.Empty, OrderIndex, Convert.ToBase64String(Version));
+        => new(Id, Title, Description ?? string.Empty, OrderIndex, CreatedAt, UpdatedAt, Version);
 }

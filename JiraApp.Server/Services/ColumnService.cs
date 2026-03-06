@@ -92,7 +92,7 @@ public class ColumnService(
     public async Task<Result<ColumnDto>> UpdateColumnAsync(Guid id, EditColumnDto editColumnDto, CancellationToken ct)
     {
         logger.LogColumnUpdateStarted(id, editColumnDto.Name);
-        ColumnModel? column = await mainDbContext.Columns.FirstOrDefaultAsync(x => x.Id == id, ct);
+        ColumnModel? column = await mainDbContext.Columns.Include(x => x.Tasks).FirstOrDefaultAsync(x => x.Id == id, ct);
         if (column is null)
         {
             logger.LogColumnNotFound(id);
@@ -109,7 +109,7 @@ public class ColumnService(
 
     public async Task<Result<ColumnDto>> UpdateColumnOrderAsync(ReorderColumnDto reorderColumnDto, CancellationToken ct)
     {
-        ColumnModel? column = await mainDbContext.Columns.FirstOrDefaultAsync(x => x.Id == reorderColumnDto.Id, ct);
+        ColumnModel? column = await mainDbContext.Columns.Include(x => x.Tasks).FirstOrDefaultAsync(x => x.Id == reorderColumnDto.Id, ct);
         if (column is null)
         {
             logger.LogColumnNotFound(reorderColumnDto.Id);

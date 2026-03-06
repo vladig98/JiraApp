@@ -1,3 +1,3 @@
 ﻿namespace JiraApp.Server.Dtos.Boards;
 
-public readonly record struct BoardDto(Guid Id, string Name, int OrderIndex, DateTime CreatedAt, DateTime UpdatedAt);
+public readonly record struct BoardDto(Guid Id, string Name, int OrderIndex, DateTime CreatedAt, DateTime UpdatedAt, IEnumerable<ColumnDto> Columns);

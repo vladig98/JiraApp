@@ -87,6 +87,8 @@ public partial class BoardsService(
         logger.LogFetchingAllBoards();
         return await mainDbContext.Boards
                 .AsNoTracking()
+                .Include(x => x.Columns)
+                    .ThenInclude(x => x.Tasks)
                 .OrderBy(x => x.OrderIndex)
                 .Select(x => x.ToDto())
                 .ToListAsync(token);
@@ -94,7 +96,7 @@ public partial class BoardsService(
 
     public async Task<Result<BoardDto>> UpdateBoardAsync(EditBoardDto editBoardDto, Guid id, CancellationToken ct)
     {
-        BoardModel? board = await mainDbContext.Boards.FirstOrDefaultAsync(x => x.Id == id, ct);
+        BoardModel? board = await mainDbContext.Boards.Include(x => x.Columns).ThenInclude(x => x.Tasks).FirstOrDefaultAsync(x => x.Id == id, ct);
         if (board is null)
         {
             return Result<BoardDto>.Failure($"Board '{id}' not found.", ErrorType.NotFound);

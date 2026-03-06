@@ -10,5 +10,5 @@ public class ColumnModel : BaseModel
     public ICollection<TaskModel> Tasks { get; set; } = [];
 
     public ColumnDto ToDto()
-        => new(Id, Name, OrderIndex, CreatedAt, UpdatedAt);
+        => new(Id, Name, OrderIndex, CreatedAt, UpdatedAt, Tasks.Select(x => x.ToDto()));
 }
