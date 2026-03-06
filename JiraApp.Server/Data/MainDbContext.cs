@@ -12,7 +12,10 @@ public class MainDbContext(DbContextOptions<MainDbContext> options) : DbContext(
 
         modelBuilder.Entity<TaskModel>()
             .Property(p => p.Version)
-            .IsRowVersion();
+            .HasColumnName("xmin")
+            .HasColumnType("xid")
+            .ValueGeneratedOnAddOrUpdate()
+            .IsConcurrencyToken();
 
         modelBuilder.Entity<ColumnModel>()
             .HasOne(x => x.Board)
