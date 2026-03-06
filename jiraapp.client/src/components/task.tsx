@@ -25,7 +25,7 @@ const TaskCard = memo(({ task }: TaskCardProps) => {
                     </div>
                 </div>
                 <div className="text-[9px] text-slate-300" title={`Version: ${task.version}`}>
-                    v.{task.version.substring(0, 4)}
+                    v.{task.version}
                 </div>
             </div>
         </div>
