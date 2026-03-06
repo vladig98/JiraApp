@@ -20,7 +20,7 @@ function EditBoardForm() {
 
     const [name, setName] = useState(board?.name);
 
-    async function handleSubmit(formData: FormData) {
+    async function handleSubmit() {
         setIsSubmitting(true);
 
         // Optimistic update
@@ -43,7 +43,7 @@ function EditBoardForm() {
                 throw new Error();
             }
 
-            navigate({ to: '/boards/$boardId', params: boardId });
+            navigate({ to: '/boards/$boardId', params: { boardId: boardId } });
         } catch (error) {
             // Revert the optimistic update
             setApiError("The server rejected the new board name. Changes have been reverted.");

@@ -30,15 +30,12 @@ function BoardList() {
         setIsFetching(true)
         try {
             const response = await fetch('boards')
-            console.log(response)
             if (!response.ok) {
                 throw new Error();
             }
 
             const data = await response.json() as Board[]
             const sorted = [...data].sort((a, b) => a.orderIndex - b.orderIndex);
-
-            console.log(data)
 
             setBoards(sorted)
             for (const b of sorted) {

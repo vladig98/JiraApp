@@ -12,8 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BoardsCreateRouteImport } from './routes/boards/create'
 import { Route as BoardsBoardIdRouteImport } from './routes/boards/$boardId'
+import { Route as BoardsBoardIdIndexRouteImport } from './routes/boards/$boardId/index'
+import { Route as ColumnsUpdateColumnIdRouteImport } from './routes/columns/update/$columnId'
+import { Route as ColumnsDeleteColumnIdRouteImport } from './routes/columns/delete/$columnId'
 import { Route as BoardsUpdateBoardIdRouteImport } from './routes/boards/update/$boardId'
 import { Route as BoardsDeleteBoardIdRouteImport } from './routes/boards/delete/$boardId'
+import { Route as BoardsBoardIdColumnsCreateRouteImport } from './routes/boards/$boardId/columns/create'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,6 +34,21 @@ const BoardsBoardIdRoute = BoardsBoardIdRouteImport.update({
   path: '/boards/$boardId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BoardsBoardIdIndexRoute = BoardsBoardIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BoardsBoardIdRoute,
+} as any)
+const ColumnsUpdateColumnIdRoute = ColumnsUpdateColumnIdRouteImport.update({
+  id: '/columns/update/$columnId',
+  path: '/columns/update/$columnId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColumnsDeleteColumnIdRoute = ColumnsDeleteColumnIdRouteImport.update({
+  id: '/columns/delete/$columnId',
+  path: '/columns/delete/$columnId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BoardsUpdateBoardIdRoute = BoardsUpdateBoardIdRouteImport.update({
   id: '/boards/update/$boardId',
   path: '/boards/update/$boardId',
@@ -40,28 +59,45 @@ const BoardsDeleteBoardIdRoute = BoardsDeleteBoardIdRouteImport.update({
   path: '/boards/delete/$boardId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BoardsBoardIdColumnsCreateRoute =
+  BoardsBoardIdColumnsCreateRouteImport.update({
+    id: '/columns/create',
+    path: '/columns/create',
+    getParentRoute: () => BoardsBoardIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/boards/$boardId': typeof BoardsBoardIdRoute
+  '/boards/$boardId': typeof BoardsBoardIdRouteWithChildren
   '/boards/create': typeof BoardsCreateRoute
   '/boards/delete/$boardId': typeof BoardsDeleteBoardIdRoute
   '/boards/update/$boardId': typeof BoardsUpdateBoardIdRoute
+  '/columns/delete/$columnId': typeof ColumnsDeleteColumnIdRoute
+  '/columns/update/$columnId': typeof ColumnsUpdateColumnIdRoute
+  '/boards/$boardId/': typeof BoardsBoardIdIndexRoute
+  '/boards/$boardId/columns/create': typeof BoardsBoardIdColumnsCreateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/boards/$boardId': typeof BoardsBoardIdRoute
   '/boards/create': typeof BoardsCreateRoute
   '/boards/delete/$boardId': typeof BoardsDeleteBoardIdRoute
   '/boards/update/$boardId': typeof BoardsUpdateBoardIdRoute
+  '/columns/delete/$columnId': typeof ColumnsDeleteColumnIdRoute
+  '/columns/update/$columnId': typeof ColumnsUpdateColumnIdRoute
+  '/boards/$boardId': typeof BoardsBoardIdIndexRoute
+  '/boards/$boardId/columns/create': typeof BoardsBoardIdColumnsCreateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/boards/$boardId': typeof BoardsBoardIdRoute
+  '/boards/$boardId': typeof BoardsBoardIdRouteWithChildren
   '/boards/create': typeof BoardsCreateRoute
   '/boards/delete/$boardId': typeof BoardsDeleteBoardIdRoute
   '/boards/update/$boardId': typeof BoardsUpdateBoardIdRoute
+  '/columns/delete/$columnId': typeof ColumnsDeleteColumnIdRoute
+  '/columns/update/$columnId': typeof ColumnsUpdateColumnIdRoute
+  '/boards/$boardId/': typeof BoardsBoardIdIndexRoute
+  '/boards/$boardId/columns/create': typeof BoardsBoardIdColumnsCreateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,13 +107,20 @@ export interface FileRouteTypes {
     | '/boards/create'
     | '/boards/delete/$boardId'
     | '/boards/update/$boardId'
+    | '/columns/delete/$columnId'
+    | '/columns/update/$columnId'
+    | '/boards/$boardId/'
+    | '/boards/$boardId/columns/create'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/boards/$boardId'
     | '/boards/create'
     | '/boards/delete/$boardId'
     | '/boards/update/$boardId'
+    | '/columns/delete/$columnId'
+    | '/columns/update/$columnId'
+    | '/boards/$boardId'
+    | '/boards/$boardId/columns/create'
   id:
     | '__root__'
     | '/'
@@ -85,14 +128,20 @@ export interface FileRouteTypes {
     | '/boards/create'
     | '/boards/delete/$boardId'
     | '/boards/update/$boardId'
+    | '/columns/delete/$columnId'
+    | '/columns/update/$columnId'
+    | '/boards/$boardId/'
+    | '/boards/$boardId/columns/create'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  BoardsBoardIdRoute: typeof BoardsBoardIdRoute
+  BoardsBoardIdRoute: typeof BoardsBoardIdRouteWithChildren
   BoardsCreateRoute: typeof BoardsCreateRoute
   BoardsDeleteBoardIdRoute: typeof BoardsDeleteBoardIdRoute
   BoardsUpdateBoardIdRoute: typeof BoardsUpdateBoardIdRoute
+  ColumnsDeleteColumnIdRoute: typeof ColumnsDeleteColumnIdRoute
+  ColumnsUpdateColumnIdRoute: typeof ColumnsUpdateColumnIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -118,6 +167,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BoardsBoardIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/boards/$boardId/': {
+      id: '/boards/$boardId/'
+      path: '/'
+      fullPath: '/boards/$boardId/'
+      preLoaderRoute: typeof BoardsBoardIdIndexRouteImport
+      parentRoute: typeof BoardsBoardIdRoute
+    }
+    '/columns/update/$columnId': {
+      id: '/columns/update/$columnId'
+      path: '/columns/update/$columnId'
+      fullPath: '/columns/update/$columnId'
+      preLoaderRoute: typeof ColumnsUpdateColumnIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/columns/delete/$columnId': {
+      id: '/columns/delete/$columnId'
+      path: '/columns/delete/$columnId'
+      fullPath: '/columns/delete/$columnId'
+      preLoaderRoute: typeof ColumnsDeleteColumnIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/boards/update/$boardId': {
       id: '/boards/update/$boardId'
       path: '/boards/update/$boardId'
@@ -132,15 +202,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BoardsDeleteBoardIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/boards/$boardId/columns/create': {
+      id: '/boards/$boardId/columns/create'
+      path: '/columns/create'
+      fullPath: '/boards/$boardId/columns/create'
+      preLoaderRoute: typeof BoardsBoardIdColumnsCreateRouteImport
+      parentRoute: typeof BoardsBoardIdRoute
+    }
   }
 }
 
+interface BoardsBoardIdRouteChildren {
+  BoardsBoardIdIndexRoute: typeof BoardsBoardIdIndexRoute
+  BoardsBoardIdColumnsCreateRoute: typeof BoardsBoardIdColumnsCreateRoute
+}
+
+const BoardsBoardIdRouteChildren: BoardsBoardIdRouteChildren = {
+  BoardsBoardIdIndexRoute: BoardsBoardIdIndexRoute,
+  BoardsBoardIdColumnsCreateRoute: BoardsBoardIdColumnsCreateRoute,
+}
+
+const BoardsBoardIdRouteWithChildren = BoardsBoardIdRoute._addFileChildren(
+  BoardsBoardIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  BoardsBoardIdRoute: BoardsBoardIdRoute,
+  BoardsBoardIdRoute: BoardsBoardIdRouteWithChildren,
   BoardsCreateRoute: BoardsCreateRoute,
   BoardsDeleteBoardIdRoute: BoardsDeleteBoardIdRoute,
   BoardsUpdateBoardIdRoute: BoardsUpdateBoardIdRoute,
+  ColumnsDeleteColumnIdRoute: ColumnsDeleteColumnIdRoute,
+  ColumnsUpdateColumnIdRoute: ColumnsUpdateColumnIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

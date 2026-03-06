@@ -2,6 +2,7 @@ import type ColumnProps from "../types/columnProps";
 import type Task from "../types/task";
 import { memo } from 'react';
 import TaskCard from "./task";
+import { Link } from '@tanstack/react-router'
 
 const Column = memo(({ column }: ColumnProps) => {
     const columnTasks = column.tasks as Task[];
@@ -18,6 +19,24 @@ const Column = memo(({ column }: ColumnProps) => {
                     <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-bold">
                         {columnTasks.length}
                     </span>
+                    <div className="col-span-1 pr-6 flex justify-end gap-1">
+                        <Link
+                            to="/columns/update/$columnId"
+                            params={{ columnId: column.id }}
+                            className="p-2 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors"
+                            title="Update"
+                        >
+                            <span className="text-lg">✎</span>
+                        </Link>
+                        <Link
+                            to="/columns/delete/$columnId"
+                            params={{ columnId: column.id }}
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                            title="Delete"
+                        >
+                            <span className="text-lg">🗑</span>
+                        </Link>
+                    </div>
                 </div>
             </div>
 
