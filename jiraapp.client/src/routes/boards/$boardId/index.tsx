@@ -33,8 +33,8 @@ function BoardIndex() {
             {/* The Kanban Track */}
             <main className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
                 <div className="flex gap-6 p-8 h-full min-w-max">
-                    {columns.map(col => (
-                        <Column key={col.id} column={col} />
+                    {columns.map((col, index) => (
+                        <Column key={col.id} column={col} index={index} />
                     ))}
 
                     {/* Add Column Button */}

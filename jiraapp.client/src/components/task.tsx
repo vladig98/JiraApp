@@ -1,10 +1,19 @@
 import { memo } from 'react';
 import type TaskCardProps from '../types/taskCardProps';
 import { Link } from '@tanstack/react-router'
+import { useSortable } from '@dnd-kit/react/sortable';
 
-const TaskCard = memo(({ task }: TaskCardProps) => {
+const TaskCard = memo(({ task, index, column }: TaskCardProps) => {
+    const { ref, isDragging } = useSortable({
+        id: task.id,
+        index,
+        type: 'item',
+        accept: 'item',
+        group: column
+    });
+
     return (
-        <div className="group bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:border-[#0052CC] hover:shadow-md transition-all cursor-grab active:cursor-grabbing">
+        <div data-dragging={isDragging} ref={ref} className="Item group bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:border-[#0052CC] hover:shadow-md transition-all cursor-grab active:cursor-grabbing">
             <div className="flex justify-between items-start mb-2">
                 <span className="text-[10px] text-slate-400 font-mono self-center">
                     idx: {task.orderIndex}

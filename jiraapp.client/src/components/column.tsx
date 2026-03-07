@@ -1,19 +1,125 @@
 import type ColumnProps from "../types/columnProps";
 import type Task from "../types/task";
+import type Board from "../types/board";
+import { useBoardStore } from '../stores/useBoardStore'
 import { memo } from 'react';
 import TaskCard from "./task";
 import { Link, useNavigate } from '@tanstack/react-router'
+import { CollisionPriority } from '@dnd-kit/abstract';
+import { useSortable, isSortable } from '@dnd-kit/react/sortable';
+import { useDragDropMonitor } from '@dnd-kit/react';
 
-const Column = memo(({ column }: ColumnProps) => {
+const Column = memo(({ column, index }: ColumnProps) => {
     const columnTasks = column.tasks as Task[];
     const navigate = useNavigate();
+    const upsert = useBoardStore((state) => state.upsert);
+    const getTask = useBoardStore((state) => state.getTask);
+
+    const { ref } = useSortable({
+        id: column.id,
+        index,
+        type: 'column',
+        collisionPriority: CollisionPriority.Low,
+        accept: ['column']
+    });
+
+    async function refetchBoards() {
+        const boardsRepsonse = await fetch('/boards')
+        if (!boardsRepsonse.ok) {
+            throw new Error();
+        }
+
+        const data = await boardsRepsonse.json() as Board[]
+        const sorted = [...data].sort((a, b) => a.orderIndex - b.orderIndex);
+
+        for (const b of sorted) {
+            upsert(b);
+        }
+    }
+
+    async function reorderColumns(columnId: string, index: number) {
+        try {
+            const response = await fetch("/columns/reorder", {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: columnId, orderIndex: index })
+            });
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            await refetchBoards();
+        } catch (error) {
+            // Trigger the drag and rop manually to revert
+            console.log(error)
+        }
+    }
+
+    async function reorderTasks(taskId: string, index: number, sourceColumnId: string, targetColumnId: string | null) {
+        const task = getTask(taskId);
+        const url = targetColumnId ? "/tasks/move" : "/tasks/reorder";
+        const body = targetColumnId ? JSON.stringify({ id: taskId, columnId: targetColumnId, orderIndex: index, version: task.version })
+            : JSON.stringify({ id: taskId, orderIndex: index, version: task.version });
+
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: body
+            });
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            await refetchBoards();
+        } catch (error) {
+            // Trigger the drag and rop manually to revert
+            console.log(error)
+        }
+    }
+
+    useDragDropMonitor({
+        onDragEnd(event, manager) {
+            const { operation, canceled } = event;
+
+            if (canceled) {
+                return;
+            }
+
+            const itemId = operation.target?.id as string;
+            if (!itemId) {
+                return;
+            }
+
+            const { source } = event.operation;
+            if (!isSortable(source)) {
+                return;
+            }
+
+            const { type, index, initialGroup, group } = source;
+
+            switch (type) {
+                case "column":
+                    reorderColumns(itemId, index);
+                    break;
+                case "item":
+                    reorderTasks(itemId, index, initialGroup as string, group as string);
+                    break;
+                default:
+                    return;
+            }
+        }
+    });
+
 
     function goToCreateTask() {
         navigate({ to: '/columns/$columnId/tasks/create', params: { columnId: column.id } });
     }
 
     return (
-        <div className="w-80 flex flex-col max-h-full">
+        <div ref={ref} className={"Column w-80 flex flex-col max-h-full"}>
             {/* Column Header */}
             <div className="flex items-center justify-between mb-4 px-1">
                 <div className="flex items-center gap-2">
@@ -48,8 +154,8 @@ const Column = memo(({ column }: ColumnProps) => {
             {/* Column Body */}
             <div className="bg-slate-100/50 rounded-xl p-3 flex-1 border border-slate-200/60 overflow-y-auto space-y-3 shadow-inner custom-scrollbar">
                 {columnTasks.length > 0 ? (
-                    columnTasks.map(task => (
-                        <TaskCard key={task.id} task={task} />
+                    columnTasks.map((task, index) => (
+                        <TaskCard key={task.id} task={task} index={index} column={column.id} />
                     ))
                 ) : (
                     <div className="py-8 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center text-slate-400 text-sm italic text-center px-4">
