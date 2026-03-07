@@ -28,14 +28,6 @@ function BoardIndex() {
                     </nav>
                     <h1 className="text-xl font-bold text-slate-900">Sprint Optimization Engine</h1>
                 </div>
-                <div className="flex items-center gap-4">
-                    <button className="text-sm font-medium text-slate-600 hover:bg-slate-100 px-3 py-2 rounded transition-colors">
-                        Settings
-                    </button>
-                    <button className="bg-[#0052CC] hover:bg-[#0747A6] text-white px-4 py-2 rounded font-medium shadow-sm transition-all active:scale-95">
-                        + New Task
-                    </button>
-                </div>
             </header>
 
             {/* The Kanban Track */}

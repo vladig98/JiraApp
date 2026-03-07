@@ -20,4 +20,5 @@ export default interface BoardActions {
 
     getBoardByColumnId: (columnId: string) => Board | undefined;
     getBoardByTaskId: (taskId: string) => Board | undefined;
+    getColumnByTaskId: (taskId: string) => Column | undefined;
 }

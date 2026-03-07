@@ -2,10 +2,15 @@ import type ColumnProps from "../types/columnProps";
 import type Task from "../types/task";
 import { memo } from 'react';
 import TaskCard from "./task";
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 
 const Column = memo(({ column }: ColumnProps) => {
     const columnTasks = column.tasks as Task[];
+    const navigate = useNavigate();
+
+    function goToCreateTask() {
+        navigate({ to: '/columns/$columnId/tasks/create', params: { columnId: column.id } });
+    }
 
     return (
         <div className="w-80 flex flex-col max-h-full">
@@ -51,6 +56,10 @@ const Column = memo(({ column }: ColumnProps) => {
                         Drop tasks here
                     </div>
                 )}
+                <button onClick={goToCreateTask} className="w-full group border-dashed border-slate-300 rounded-xl p-4 rounded-lg border border-slate-200 shadow-sm hover:border-[#0052CC] hover:shadow-md transition-all cursor-grab active:cursor-grabbing">
+                    <span className="text-xl mr-2 group-hover:scale-125 transition-transform">+</span>
+                    Add Task
+                </button>
             </div>
         </div>
     );

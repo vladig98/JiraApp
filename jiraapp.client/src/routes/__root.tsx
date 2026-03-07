@@ -12,8 +12,6 @@ export const Route = createRootRoute({
                     <Link to="/">
                         <div className="px-6 py-2 bg-white/10 border-r-4 border-white">Boards</div>
                     </Link>
-                    <div className="px-6 py-2 hover:bg-white/5 cursor-pointer opacity-70">Issues</div>
-                    <div className="px-6 py-2 hover:bg-white/5 cursor-pointer opacity-70">Reports</div>
                 </nav>
             </aside>
 

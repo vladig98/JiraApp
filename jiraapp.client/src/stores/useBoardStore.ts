@@ -143,4 +143,19 @@ export const useBoardStore = create<BoardActions>((set) => ({
         }
         return undefined;
     },
+
+    getColumnByTaskId: (taskId) => {
+        for (const bid in _internalMap) {
+            const board = _internalMap[bid];
+
+            const targetColumn = board.columns.find(col =>
+                col.tasks.some(t => t.id === taskId)
+            );
+
+            if (targetColumn) {
+                return targetColumn as Column;
+            }
+        }
+        return undefined;
+    }
 }));

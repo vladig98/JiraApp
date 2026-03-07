@@ -13,10 +13,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as BoardsCreateRouteImport } from './routes/boards/create'
 import { Route as BoardsBoardIdRouteImport } from './routes/boards/$boardId'
 import { Route as BoardsBoardIdIndexRouteImport } from './routes/boards/$boardId/index'
+import { Route as TasksUpdateTaskIdRouteImport } from './routes/tasks/update/$taskId'
+import { Route as TasksDeleteTaskIdRouteImport } from './routes/tasks/delete/$taskId'
 import { Route as ColumnsUpdateColumnIdRouteImport } from './routes/columns/update/$columnId'
 import { Route as ColumnsDeleteColumnIdRouteImport } from './routes/columns/delete/$columnId'
 import { Route as BoardsUpdateBoardIdRouteImport } from './routes/boards/update/$boardId'
 import { Route as BoardsDeleteBoardIdRouteImport } from './routes/boards/delete/$boardId'
+import { Route as ColumnsColumnIdTasksCreateRouteImport } from './routes/columns/$columnId/tasks/create'
 import { Route as BoardsBoardIdColumnsCreateRouteImport } from './routes/boards/$boardId/columns/create'
 
 const IndexRoute = IndexRouteImport.update({
@@ -39,6 +42,16 @@ const BoardsBoardIdIndexRoute = BoardsBoardIdIndexRouteImport.update({
   path: '/',
   getParentRoute: () => BoardsBoardIdRoute,
 } as any)
+const TasksUpdateTaskIdRoute = TasksUpdateTaskIdRouteImport.update({
+  id: '/tasks/update/$taskId',
+  path: '/tasks/update/$taskId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksDeleteTaskIdRoute = TasksDeleteTaskIdRouteImport.update({
+  id: '/tasks/delete/$taskId',
+  path: '/tasks/delete/$taskId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ColumnsUpdateColumnIdRoute = ColumnsUpdateColumnIdRouteImport.update({
   id: '/columns/update/$columnId',
   path: '/columns/update/$columnId',
@@ -59,6 +72,12 @@ const BoardsDeleteBoardIdRoute = BoardsDeleteBoardIdRouteImport.update({
   path: '/boards/delete/$boardId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ColumnsColumnIdTasksCreateRoute =
+  ColumnsColumnIdTasksCreateRouteImport.update({
+    id: '/columns/$columnId/tasks/create',
+    path: '/columns/$columnId/tasks/create',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BoardsBoardIdColumnsCreateRoute =
   BoardsBoardIdColumnsCreateRouteImport.update({
     id: '/columns/create',
@@ -74,8 +93,11 @@ export interface FileRoutesByFullPath {
   '/boards/update/$boardId': typeof BoardsUpdateBoardIdRoute
   '/columns/delete/$columnId': typeof ColumnsDeleteColumnIdRoute
   '/columns/update/$columnId': typeof ColumnsUpdateColumnIdRoute
+  '/tasks/delete/$taskId': typeof TasksDeleteTaskIdRoute
+  '/tasks/update/$taskId': typeof TasksUpdateTaskIdRoute
   '/boards/$boardId/': typeof BoardsBoardIdIndexRoute
   '/boards/$boardId/columns/create': typeof BoardsBoardIdColumnsCreateRoute
+  '/columns/$columnId/tasks/create': typeof ColumnsColumnIdTasksCreateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,8 +106,11 @@ export interface FileRoutesByTo {
   '/boards/update/$boardId': typeof BoardsUpdateBoardIdRoute
   '/columns/delete/$columnId': typeof ColumnsDeleteColumnIdRoute
   '/columns/update/$columnId': typeof ColumnsUpdateColumnIdRoute
+  '/tasks/delete/$taskId': typeof TasksDeleteTaskIdRoute
+  '/tasks/update/$taskId': typeof TasksUpdateTaskIdRoute
   '/boards/$boardId': typeof BoardsBoardIdIndexRoute
   '/boards/$boardId/columns/create': typeof BoardsBoardIdColumnsCreateRoute
+  '/columns/$columnId/tasks/create': typeof ColumnsColumnIdTasksCreateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,8 +121,11 @@ export interface FileRoutesById {
   '/boards/update/$boardId': typeof BoardsUpdateBoardIdRoute
   '/columns/delete/$columnId': typeof ColumnsDeleteColumnIdRoute
   '/columns/update/$columnId': typeof ColumnsUpdateColumnIdRoute
+  '/tasks/delete/$taskId': typeof TasksDeleteTaskIdRoute
+  '/tasks/update/$taskId': typeof TasksUpdateTaskIdRoute
   '/boards/$boardId/': typeof BoardsBoardIdIndexRoute
   '/boards/$boardId/columns/create': typeof BoardsBoardIdColumnsCreateRoute
+  '/columns/$columnId/tasks/create': typeof ColumnsColumnIdTasksCreateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -109,8 +137,11 @@ export interface FileRouteTypes {
     | '/boards/update/$boardId'
     | '/columns/delete/$columnId'
     | '/columns/update/$columnId'
+    | '/tasks/delete/$taskId'
+    | '/tasks/update/$taskId'
     | '/boards/$boardId/'
     | '/boards/$boardId/columns/create'
+    | '/columns/$columnId/tasks/create'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -119,8 +150,11 @@ export interface FileRouteTypes {
     | '/boards/update/$boardId'
     | '/columns/delete/$columnId'
     | '/columns/update/$columnId'
+    | '/tasks/delete/$taskId'
+    | '/tasks/update/$taskId'
     | '/boards/$boardId'
     | '/boards/$boardId/columns/create'
+    | '/columns/$columnId/tasks/create'
   id:
     | '__root__'
     | '/'
@@ -130,8 +164,11 @@ export interface FileRouteTypes {
     | '/boards/update/$boardId'
     | '/columns/delete/$columnId'
     | '/columns/update/$columnId'
+    | '/tasks/delete/$taskId'
+    | '/tasks/update/$taskId'
     | '/boards/$boardId/'
     | '/boards/$boardId/columns/create'
+    | '/columns/$columnId/tasks/create'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -142,6 +179,9 @@ export interface RootRouteChildren {
   BoardsUpdateBoardIdRoute: typeof BoardsUpdateBoardIdRoute
   ColumnsDeleteColumnIdRoute: typeof ColumnsDeleteColumnIdRoute
   ColumnsUpdateColumnIdRoute: typeof ColumnsUpdateColumnIdRoute
+  TasksDeleteTaskIdRoute: typeof TasksDeleteTaskIdRoute
+  TasksUpdateTaskIdRoute: typeof TasksUpdateTaskIdRoute
+  ColumnsColumnIdTasksCreateRoute: typeof ColumnsColumnIdTasksCreateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -174,6 +214,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BoardsBoardIdIndexRouteImport
       parentRoute: typeof BoardsBoardIdRoute
     }
+    '/tasks/update/$taskId': {
+      id: '/tasks/update/$taskId'
+      path: '/tasks/update/$taskId'
+      fullPath: '/tasks/update/$taskId'
+      preLoaderRoute: typeof TasksUpdateTaskIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks/delete/$taskId': {
+      id: '/tasks/delete/$taskId'
+      path: '/tasks/delete/$taskId'
+      fullPath: '/tasks/delete/$taskId'
+      preLoaderRoute: typeof TasksDeleteTaskIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/columns/update/$columnId': {
       id: '/columns/update/$columnId'
       path: '/columns/update/$columnId'
@@ -200,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/boards/delete/$boardId'
       fullPath: '/boards/delete/$boardId'
       preLoaderRoute: typeof BoardsDeleteBoardIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/columns/$columnId/tasks/create': {
+      id: '/columns/$columnId/tasks/create'
+      path: '/columns/$columnId/tasks/create'
+      fullPath: '/columns/$columnId/tasks/create'
+      preLoaderRoute: typeof ColumnsColumnIdTasksCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/boards/$boardId/columns/create': {
@@ -234,6 +295,9 @@ const rootRouteChildren: RootRouteChildren = {
   BoardsUpdateBoardIdRoute: BoardsUpdateBoardIdRoute,
   ColumnsDeleteColumnIdRoute: ColumnsDeleteColumnIdRoute,
   ColumnsUpdateColumnIdRoute: ColumnsUpdateColumnIdRoute,
+  TasksDeleteTaskIdRoute: TasksDeleteTaskIdRoute,
+  TasksUpdateTaskIdRoute: TasksUpdateTaskIdRoute,
+  ColumnsColumnIdTasksCreateRoute: ColumnsColumnIdTasksCreateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

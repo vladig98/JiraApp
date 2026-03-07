@@ -5,5 +5,5 @@ export default interface Task {
     orderIndex: number;
     createdAt: Date;
     updatedAt: Date;
-    version: string;
+    version: number;
 }

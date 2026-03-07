@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import type TaskCardProps from '../types/taskCardProps';
+import { Link } from '@tanstack/react-router'
 
 const TaskCard = memo(({ task }: TaskCardProps) => {
     return (
@@ -8,6 +9,24 @@ const TaskCard = memo(({ task }: TaskCardProps) => {
                 <span className="text-[10px] text-slate-400 font-mono self-center">
                     idx: {task.orderIndex}
                 </span>
+                <div className="flex justify-between items-start mb-2">
+                    <Link
+                        to="/tasks/update/$taskId"
+                        params={{ taskId: task.id }}
+                        className="p-2 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors"
+                        title="Update"
+                    >
+                        <span className="text-xs">✎</span>
+                    </Link>
+                    <Link
+                        to="/tasks/delete/$taskId"
+                        params={{ taskId: task.id }}
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Delete"
+                    >
+                        <span className="text-xs">🗑</span>
+                    </Link>
+                </div>
             </div>
 
             <h4 className="text-sm font-bold text-slate-900 leading-tight mb-1">
